@@ -49,6 +49,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
+    // Material Icons Extended (مهمة جداً لعدم حدوث كراش مع أيقونات السهم والقلب المتقدمة)
+    implementation("androidx.compose.material:material-icons-extended")
+
     // Google Maps
     implementation(libs.maps.compose)
 
