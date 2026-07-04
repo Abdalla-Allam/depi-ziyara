@@ -12,6 +12,7 @@ data class PlaceEntity(
     val latitude: Double,
     val longitude: Double,
     val imageUrl: String,
-    val city: String,
+    val governorate:String,
+    val category: String,
     val isFavorite: Boolean = false
 )
