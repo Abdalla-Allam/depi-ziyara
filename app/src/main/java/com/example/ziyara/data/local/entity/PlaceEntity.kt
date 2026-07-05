@@ -5,13 +5,15 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "places")
 data class PlaceEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey
+    val id: Int,
     val name: String,
     val description: String,
     val latitude: Double,
     val longitude: Double,
-    val imageUrl: String,
-    val city: String,
+    val imageUrl: String = "",
+    val governorate: String,
+    val category: String,
+    val ticketPrice: String = "60 EGP",
     val isFavorite: Boolean = false
 )
