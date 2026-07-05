@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "name": "Giza Pyramid Complex",
+    "governorate": "Giza",
+    "category": "Pyramid",
+    "latitude": 29.977482116719116,
+    "longitude": 31.132506195220483,
+    "imageUrl": "https://i.pinimg.com/1200x/95/35/69/9535693b5e9f9008d9f1e8fcf3733d79.jpg",
+    "description": "The Giza Pyramid Complex is Egypt's most famous archaeological site and home to the Great Pyramid of Khufu, the last remaining Wonder of the Ancient World. Built more than 4,500 years ago, the complex also includes the pyramids of Khafre and Menkaure, along with the legendary Great Sphinx. Visitors can explore remarkable monuments, learn about ancient Egyptian engineering, and enjoy breathtaking panoramic views of one of history's greatest civilizations."
+  },
+  {
+    "id": 2,
+    "name": "Valley of the Kings",
+    "governorate": "Luxor",
+    "category": "Tomb",
+    "latitude": 25.74045399061802,
+    "longitude": 32.601336207933244,
+    "imageUrl": "https://i.pinimg.com/1200x/a2/40/ac/a240acc62df5bed1683cd416813b0083.jpg",
+    "description": "Located on the west bank of the Nile in Luxor, the Valley of the Kings served as the royal burial ground of Egypt's New Kingdom pharaohs. More than sixty tombs have been discovered here, many decorated with colorful wall paintings that remain well preserved. The site is best known for the tomb of Tutankhamun and offers visitors an unforgettable journey into the beliefs, art, and history of ancient Egypt."
+  },
+  {
+    "id": 3,
+    "name": "Karnak Temple Complex",
+    "governorate": "Luxor",
+    "category": "Temple",
+    "latitude": 25.719076249191563,
+    "longitude": 32.6571951981472,
+    "imageUrl": "https://i.pinimg.com/736x/d8/bd/e2/d8bde24fc88ce7974351229a6c109958.jpg",
+    "description": "The Karnak Temple Complex is one of the largest religious monuments ever built. Dedicated mainly to Amun-Ra, the temple was expanded by many pharaohs over nearly two thousand years. Visitors can walk through impressive pylons, admire towering obelisks, explore sacred lakes, and stand beneath the magnificent Hypostyle Hall with its 134 massive stone columns."
+  },
+  {
+    "id": 4,
+    "name": "Temple of Abydos",
+    "governorate": "Sohag",
+    "category": "Temple",
+    "latitude": 26.184827660993083,
+    "longitude": 31.918838440996996,
+    "imageUrl": "https://i.pinimg.com/1200x/00/d0/fe/00d0fe8f6d4d3e1c9c3aefa110af40e7.jpg",
+    "description": "The Temple of Abydos, built by Pharaoh Seti I, is one of Egypt's most beautiful and historically significant temples. It is famous for its remarkably preserved carvings and the Abydos King List, which records many ancient Egyptian rulers in chronological order. The detailed artwork and peaceful surroundings make it a fascinating destination for visitors interested in Egypt's rich history."
+  },
+  {
+    "id": 5,
+    "name": "Dendera Temple Complex",
+    "governorate": "Qena",
+    "category": "Temple",
+    "latitude": 26.142534641121937,
+    "longitude": 32.67040694788618,
+    "imageUrl": "https://i.pinimg.com/1200x/29/fd/30/29fd3030f070aa20237fafe1ec3920e7.jpg",
+    "description": "Dedicated to Hathor, the goddess of love, music, and joy, Dendera Temple is among Egypt's best-preserved ancient temples. Inside, visitors can admire colorful ceilings, astronomical carvings, beautifully decorated columns, and impressive architecture that has survived for centuries. Its exceptional preservation provides a rare opportunity to experience how Egyptian temples originally appeared."
+  },
+  {
+    "id": 6,
+    "name": "Medinet Habu",
+    "governorate": "Luxor",
+    "category": "Temple",
+    "latitude": 25.719693090949168,
+    "longitude": 32.60119126508345,
+    "imageUrl": "https://i.pinimg.com/1200x/99/ef/f6/99eff68c9c3f04580640b5316d3dfcdb.jpg",
+    "description": "Medinet Habu is the magnificent mortuary temple of Pharaoh Ramesses III and one of Luxor's hidden treasures. Surrounded by massive fortified walls, the temple features detailed reliefs depicting battles, religious ceremonies, and scenes from daily life. Its quieter atmosphere allows visitors to appreciate the impressive architecture and artistic achievements without large crowds."
+  },
+  {
+    "id": 7,
+    "name": "Beni Hasan Tombs",
+    "governorate": "Minya",
+    "category": "Tomb",
+    "latitude": 27.93138610162234,
+    "longitude": 30.875652615344464,
+    "imageUrl": "https://i.pinimg.com/736x/3f/ed/15/3fed15cb0c96459f4dcf7f03a95c926b.jpg",
+    "description": "The Beni Hasan Tombs are carved into limestone cliffs overlooking the Nile Valley and date back almost four thousand years. Their colorful wall paintings depict wrestling, hunting, farming, trade, and everyday life, offering valuable insight into ancient Egyptian society beyond royal traditions. The hilltop location also provides stunning panoramic views of the surrounding landscape."
+  },
+  {
+    "id": 8,
+    "name": "White Desert National Park",
+    "governorate": "New Valley",
+    "category": "Nature",
+    "latitude": 27.28309719399581,
+    "longitude": 28.20112111719726,
+    "imageUrl": "https://i.pinimg.com/1200x/e4/c9/48/e4c9487165d102de4c4cd066fdad4ddd.jpg",
+    "description": "The White Desert National Park is one of Egypt's most extraordinary natural attractions. Over thousands of years, wind erosion shaped white chalk formations into spectacular natural sculptures resembling mushrooms, animals, and towering monuments. Visitors enjoy unique desert landscapes, unforgettable camping experiences, breathtaking sunsets, and exceptionally clear night skies filled with stars."
+  },
+  {
+    "id": 9,
+    "name": "Siwa Oasis",
+    "governorate": "Matrouh",
+    "category": "Oasis",
+    "latitude": 29.20341605588597,
+    "longitude": 25.520314717642183,
+    "imageUrl": "https://i.pinimg.com/1200x/4b/0c/db/4b0cdb07bb71ad77ad7956298345af95.jpg",
+    "description": "Siwa Oasis is a peaceful destination in Egypt's Western Desert, famous for its palm groves, salt lakes, freshwater springs, and unique Berber culture. Visitors can float in mineral-rich lakes, explore the Temple of the Oracle, discover the historic Shali Fortress, and enjoy breathtaking sunsets. Its tranquil atmosphere makes Siwa one of Egypt's most unforgettable destinations."
+  },
+  {
+    "id": 10,
+    "name": "Ras Mohamed National Park",
+    "governorate": "South Sinai",
+    "category": "National Park",
+    "latitude": 27.79392863911082,
+    "longitude": 34.17852249762517,
+    "imageUrl": "https://i.pinimg.com/736x/c9/50/6c/c9506c187c4eb29c255c23792045632f.jpg",
+    "description": "Located where the Gulf of Aqaba meets the Gulf of Suez, Ras Mohamed National Park is internationally recognized for its extraordinary marine life and colorful coral reefs. Snorkelers and divers can discover hundreds of fish species, sea turtles, and crystal-clear waters. The park also offers stunning coastal scenery, mangrove forests, and unforgettable Red Sea landscapes."
+  },
+  {
+    "id": 11,
+    "name": "Bibliotheca Alexandrina",
+    "governorate": "Alexandria",
+    "category": "Museum",
+    "latitude": 31.209040842884814,
+    "longitude": 29.909963362708606,
+    "imageUrl": "https://i.pinimg.com/1200x/2b/bc/28/2bbc286599fcc19ff7897d511288b161.jpg",
+    "description": "The Bibliotheca Alexandrina is a modern cultural landmark inspired by the legendary Ancient Library of Alexandria. It houses millions of books, museums, art galleries, exhibitions, and research centers that celebrate knowledge and culture. Its striking circular architecture overlooking the Mediterranean Sea makes it one of Egypt's most impressive contemporary attractions."
+  },
+  {
+    "id": 12,
+    "name": "Citadel of Saladin",
+    "governorate": "Cairo",
+    "category": "Historical Fortress",
+    "latitude": 30.028950052330366,
+    "longitude": 31.260100638100127,
+    "imageUrl": "https://i.pinimg.com/736x/40/99/6b/40996b0ea58ec14d349bd07f20fac572.jpg",
+    "description": "Built by Saladin in the 12th century, the Cairo Citadel served as Egypt's center of government for centuries. The fortress is home to the magnificent Mosque of Muhammad Ali, museums, and panoramic viewpoints overlooking Cairo. Combining Islamic architecture with rich historical significance, the citadel remains one of the country's most important cultural landmarks."
+  },
+  {
+    "id": 13,
+    "name": "The Grand Egyptian Museum",
+    "governorate": "Giza",
+    "category": "Museum",
+    "latitude": 29.994908328203177,
+    "longitude": 31.127273312824485,
+    "imageUrl": "https://i.pinimg.com/736x/9f/3e/68/9f3e68ffeb992dc77c35ecbb19b5b1ce.jpg",
+    "description": "The Grand Egyptian Museum is the world's largest archaeological museum dedicated to a single civilization. Located near the Giza Pyramids, it showcases thousands of priceless ancient Egyptian artifacts, including the complete collection of Tutankhamun's treasures. With its modern architecture and interactive exhibitions, the museum offers visitors an immersive journey through Egypt's rich history and cultural heritage."
+  },
+  {
+    "id": 14,
+    "name": "Khan El Khalili",
+    "governorate": "Cairo",
+    "category": "Market",
+    "latitude": 30.047911765592154,
+    "longitude": 31.262566291544726,
+    "imageUrl": "https://i.pinimg.com/736x/4d/74/1e/4d741ed059974e36c2749c8c833e7a8c.jpg",
+    "description": "Khan El Khalili is Cairo's most famous historic market and one of the city's liveliest cultural destinations. Visitors can wander through narrow streets filled with traditional handicrafts, jewelry, spices, cafés, and local souvenirs. The vibrant atmosphere, Islamic architecture, and centuries-old history make it an essential stop for anyone exploring Egypt's capital."
+  }
+]
