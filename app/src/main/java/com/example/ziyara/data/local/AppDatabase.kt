@@ -1,6 +1,7 @@
 package com.example.ziyara.data.local
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -29,8 +30,6 @@ abstract class AppDatabase : RoomDatabase() {
         val description: String
     )
 
-    data class PlaceList(val places: List<Place>)
-
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
@@ -56,8 +55,8 @@ abstract class AppDatabase : RoomDatabase() {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
                         val jsonString = context.assets.open("places.json").bufferedReader().use { it.readText() }
-                        val placeList = Gson().fromJson(jsonString, PlaceList::class.java)
-                        val entities = placeList?.places?.map {
+                        val placeListarray = Gson().fromJson(jsonString, Array<Place>::class.java)
+                        val entities = placeListarray?.map {
                             PlaceEntity(
                                 id = it.id,
                                 name = it.name,
@@ -74,8 +73,7 @@ abstract class AppDatabase : RoomDatabase() {
 
                         getDatabase(context).placeDao().insertPlaces(entities)
                     } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+                        Log.e("ZiyaraDebug", "Prepopulation failed!", e)                    }
                 }
             }
         }
