@@ -38,6 +38,9 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.material.icons.extended)
+
     // AndroidX & Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -50,8 +53,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
-    // Material Icons Extended (مهمة جداً لعدم حدوث كراش مع أيقونات السهم والقلب المتقدمة)
-    implementation("androidx.compose.material:material-icons-extended")
+
+
 
     // Google Maps
     implementation(libs.maps.compose)
@@ -62,7 +65,7 @@ dependencies {
     ksp(libs.room.compiler)
 
     //Gson Library
-    implementation("com.google.code.gson:gson:2.14.0")
+    implementation(libs.gson)
 
     // Testing
     testImplementation(libs.junit)

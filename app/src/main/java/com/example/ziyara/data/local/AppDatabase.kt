@@ -5,14 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.ziyara.data.local.AppDatabase.Place
-import com.example.ziyara.data.local.AppDatabase.PlaceList
 import com.example.ziyara.data.local.dao.PlaceDao
 import com.example.ziyara.data.local.entity.PlaceEntity
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.BufferedReader
 
 @Database(entities = [PlaceEntity::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
@@ -32,9 +31,6 @@ abstract class AppDatabase : RoomDatabase() {
 
     data class PlaceList(val places: List<Place>)
 
-
-
-
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
@@ -45,42 +41,43 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "ziyara_database"
-                ).addCallback(
-                    object : RoomDatabase.Callback() {
-                        override fun onCreate(db: SupportSQLiteDatabase) {
-                            super.onCreate(db)
-                            INSTANCE?.let { database ->
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    val places:List<Place> = readPlaces(context, "places.json")
-                                    val entities = places.map { it.toEntity() }
-                                    database.placeDao().insertPlaces(entities)
-                                }
-                            }
-                        }
-                    }
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .addCallback(DatabaseCallback(context.applicationContext))
+                    .build()
                 INSTANCE = instance
                 instance
             }
         }
-    }
-}
 
-fun AppDatabase.Place.toEntity(): PlaceEntity {
-    return PlaceEntity(
-        id = id,
-        name = name,
-        governorate = governorate,
-        category = category,
-        latitude = latitude,
-        longitude = longitude,
-        description = description,
-        imageUrl = imageUrl
-    )
-}
-//    read the data from the file
-fun readPlaces(context: Context, filename: String): List<Place> {
-    val jsonString = context.assets.open(filename).bufferedReader().use { it.readText() }
-    val placeList = Gson().fromJson(jsonString, PlaceList::class.java)
-    return placeList.places
+        private class DatabaseCallback(private val context: Context) : RoomDatabase.Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        val jsonString = context.assets.open("places.json").bufferedReader().use { it.readText() }
+                        val placeList = Gson().fromJson(jsonString, PlaceList::class.java)
+                        val entities = placeList?.places?.map {
+                            PlaceEntity(
+                                id = it.id,
+                                name = it.name,
+                                governorate = it.governorate,
+                                category = it.category,
+                                latitude = it.latitude,
+                                longitude = it.longitude,
+                                description = it.description,
+                                imageUrl = it.imageUrl,
+                                ticketPrice = "Free",
+                                isFavorite = false
+                            )
+                        } ?: emptyList()
+
+                        getDatabase(context).placeDao().insertPlaces(entities)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+    }
 }
