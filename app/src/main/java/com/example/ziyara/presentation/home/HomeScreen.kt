@@ -8,13 +8,15 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,8 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,14 +43,21 @@ fun HomeScreen(
 ) {
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val filteredPlaces by viewModel.filteredPlaces.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     val categories = remember {
         listOf(
             "All" to "🌍",
-            "Pharaonic" to "🏛️",
-            "Islamic" to "🕌",
-            "Museums" to "🖼️",
+            "Temple" to "🏛️",
+            "Tomb" to "🪦",
+            "Museum" to "🖼️",
+            "Pyramid" to "🛕",
+            "Oasis" to "🌴",
+            "Historical Fortress" to "🏰",
+            "Market" to "🧺",
+            "National Park" to "🌳",
             "Nature" to "🌴"
         )
     }
@@ -53,23 +66,12 @@ fun HomeScreen(
     val lightBeige = Color(0xFFF7F4EB)
     val goldAccent = Color(0xFFD4A373)
 
-    val displayedPlaces = remember(searchQuery, filteredPlaces) {
-        if (searchQuery.isBlank()) {
-            filteredPlaces
-        } else {
-            filteredPlaces.filter {
-                it.name.contains(searchQuery, ignoreCase = true) ||
-                        it.governorate.contains(searchQuery, ignoreCase = true)
-            }
-        }
-    }
-
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 160.dp),
         modifier = Modifier
             .fillMaxSize()
             .background(lightBeige),
-        contentPadding = PaddingValues(bottom = 24.dp),
+        contentPadding = PaddingValues(bottom = 90.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
@@ -82,7 +84,8 @@ fun HomeScreen(
                         darkGreen,
                         shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
                     )
-                    .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 32.dp)
+                    .statusBarsPadding()
+                    .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 32.dp)
             ) {
                 Column {
                     Row(
@@ -90,32 +93,31 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(24.dp))
-                                    .background(goldAccent),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("Z", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text("Ziyara", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                                Text("Discover Egypt", color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp)
-                            }
+                        Column {
+                            Text(
+                                text = "Ziyara",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 22.sp
+                            )
+                            Text(
+                                text = "Discover Egypt",
+                                color = Color.White.copy(alpha = 0.7f),
+                                fontSize = 13.sp
+                            )
                         }
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(
-                                color = Color.White.copy(alpha = 0.15f),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Text("EN | عر", color = Color.White, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), fontSize = 12.sp)
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.White)
+                        Surface(
+                            color = Color.White.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(
+                                text = "EN | عر",
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                     }
 
@@ -123,14 +125,31 @@ fun HomeScreen(
 
                     OutlinedTextField(
                         value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        onValueChange = { viewModel.updateSearchQuery(it) },
                         placeholder = { Text("Search historical sites, museums, parks...", color = Color.Gray, fontSize = 14.sp) },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = {
+                                    viewModel.updateSearchQuery("")
+                                    focusManager.clearFocus()
+                                }) {
+                                    Icon(Icons.Default.Clear, contentDescription = null, tint = Color.Gray)
+                                }
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = {
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                        }),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(54.dp),
                         shape = RoundedCornerShape(27.dp),
                         colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White,
                             focusedBorderColor = Color.Transparent,
@@ -190,39 +209,13 @@ fun HomeScreen(
                 }
                 Spacer(modifier = Modifier.height(12.dp))
 
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    items(categories) { (category, emoji) ->
-                        val isSelected = category == selectedCategory
-                        val backgroundColor by animateColorAsState(if (isSelected) goldAccent else Color.White, label = "")
-                        val contentColor by animateColorAsState(if (isSelected) Color.White else darkGreen, label = "")
-
-                        Surface(
-                            color = backgroundColor,
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier
-                                .clickable { viewModel.selectCategory(category) }
-                                .height(40.dp),
-                            shadowElevation = 1.dp
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            ) {
-                                Text(text = "$emoji ", fontSize = 14.sp)
-                                Text(
-                                    text = category,
-                                    color = contentColor,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.sp
-                                )
-                            }
-                        }
-                    }
-                }
+                CategorySelector(
+                    categories = categories,
+                    selectedCategory = selectedCategory,
+                    darkGreen = darkGreen,
+                    goldAccent = goldAccent,
+                    onCategorySelected = { viewModel.selectCategory(it) }
+                )
             }
         }
 
@@ -235,12 +228,11 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Popular Landmarks", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = darkGreen)
-                Text("${displayedPlaces.size} found", color = Color.Gray, fontSize = 14.sp)
+                Text("${filteredPlaces.size} found", color = Color.Gray, fontSize = 14.sp)
             }
         }
 
-        items(displayedPlaces, key = { it.id }) { place ->
-            val index = displayedPlaces.indexOf(place)
+        itemsIndexed(filteredPlaces, key = { _, place -> place.id }) { index, place ->
             PlaceCard(
                 place = place,
                 modifier = Modifier
@@ -257,6 +249,55 @@ fun HomeScreen(
 }
 
 @Composable
+fun CategorySelector(
+    categories: List<Pair<String, String>>,
+    selectedCategory: String,
+    darkGreen: Color,
+    goldAccent: Color,
+    onCategorySelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = modifier
+    ) {
+        items(categories, key = { it.first }) { (category, emoji) ->
+            val isSelected = category == selectedCategory
+            val backgroundColor by animateColorAsState(if (isSelected) goldAccent else Color.White, label = "categoryBg")
+            val contentColor by animateColorAsState(if (isSelected) Color.White else darkGreen, label = "categoryContent")
+
+            Surface(
+                color = backgroundColor,
+                shape = RoundedCornerShape(20.dp),
+                shadowElevation = 1.dp,
+                modifier = Modifier
+                    .height(40.dp)
+                    .graphicsLayer {
+                        shape = RoundedCornerShape(20.dp)
+                        clip = true
+                    }
+                    .clickable { onCategorySelected(category) }
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
+                    Text(text = "$emoji ", fontSize = 14.sp)
+                    Text(
+                        text = category,
+                        color = contentColor,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 13.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun PlaceCard(
     place: PlaceEntity,
     modifier: Modifier = Modifier,
@@ -265,6 +306,10 @@ fun PlaceCard(
 ) {
     Card(
         modifier = modifier
+            .graphicsLayer {
+                shape = RoundedCornerShape(20.dp)
+                clip = true
+            }
             .clickable { onClick() }
             .height(230.dp),
         shape = RoundedCornerShape(20.dp),
@@ -308,7 +353,7 @@ fun PlaceCard(
                         .padding(8.dp)
                 ) {
                     Text(
-                        text = place.ticketPrice,
+                        text = if (place.ticketPrice == 0.0) "Free" else "${place.ticketPrice.toInt()} EGP",
                         color = Color.White,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,

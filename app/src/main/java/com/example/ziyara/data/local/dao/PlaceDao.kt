@@ -10,10 +10,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PlaceDao {
 
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaces(places: List<PlaceEntity>)
-
 
     @Query("SELECT * FROM places")
     fun getAllPlaces(): Flow<List<PlaceEntity>>
@@ -25,15 +23,12 @@ interface PlaceDao {
     @Query("SELECT * FROM places WHERE isFavorite = 1")
     fun getFavoritePlaces(): Flow<List<PlaceEntity>>
 
-
     @Query("SELECT * FROM places WHERE id = :placeId")
     suspend fun getPlaceById(placeId: Int): PlaceEntity?
 
-
-    @Query("SELECT * FROM places WHERE name LIKE '%' || :searchQuery || '%'")
+    @Query("SELECT * FROM places WHERE name LIKE '%' || :searchQuery || '%' OR governorate LIKE '%' || :searchQuery || '%'")
     fun searchPlaces(searchQuery: String): Flow<List<PlaceEntity>>
 
-
-    @Query("UPDATE places SET isFavorite = :isFav WHERE id = :placeId")
+    @Query("UPDATE places SET is_favorite = :isFav WHERE id = :placeId")
     suspend fun updateFavoriteStatus(placeId: Int, isFav: Boolean)
 }
