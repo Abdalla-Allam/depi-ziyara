@@ -1,5 +1,6 @@
 package com.example.ziyara.presentation.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ziyara.data.local.entity.PlaceEntity
@@ -12,8 +13,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val repository: PlaceRepository) : ViewModel() {
+class HomeViewModel(private val repository: PlaceRepository,val context: Context) : ViewModel() {
 
+    init {
+        viewModelScope.launch {
+            repository.prepopulateDatabase(context)
+        }
+    }
     private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
 
