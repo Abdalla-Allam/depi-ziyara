@@ -8,9 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.rememberNavController
 import com.example.ziyara.data.local.AppDatabase
 import com.example.ziyara.data.repository.PlaceRepository
-import com.example.ziyara.presentation.home.HomeScreen
+import com.example.ziyara.navigation.AppNavigation
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.home.HomeViewModelFactory
 import com.example.ziyara.ui.theme.ZiyaraTheme
@@ -30,9 +31,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(
-                        viewModel = homeViewModel,
-                        onPlaceClick = { placeId -> }
+                    // 1. بنعرف الـ navController اللي هيتحكم في التنقل بين الشاشات
+                    val navController = rememberNavController()
+
+                    // 2. بننادي على الـ AppNavigation وبنمررله الـ controller والـ viewModel
+                    AppNavigation(
+                        navController = navController,
+                        homeViewModel = homeViewModel
                     )
                 }
             }

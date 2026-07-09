@@ -38,6 +38,9 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.navigation.compose)
+
+
     implementation(libs.coil.compose)
     implementation(libs.androidx.material.icons.extended)
 
@@ -62,6 +65,7 @@ dependencies {
     // Room Database
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.androidx.navigation.runtime.ktx)
     ksp(libs.room.compiler)
 
     //Gson Library

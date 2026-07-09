@@ -1,11 +1,11 @@
-package com.example.ziyara
+package com.example.ziyara.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.ziyara.presentation.home.HomeScreen
+import com.example.ziyara.presentation.home.HomeViewModel
 
 sealed class Screen(val route: String) {
     object HomeScreen : Screen("home")
@@ -15,15 +15,22 @@ sealed class Screen(val route: String) {
     }
 }
 
-class Navigation {
-    @Composable
-    fun Nav(){
-        val navController = rememberNavController()
-        NavHost(navController = navController, startDestination = Screen.HomeScreen.route){
-           composable(route="Home Screen"){
-               HomeScreen()
-           }
+@Composable
+fun AppNavigation(
+    navController: NavHostController,
+    homeViewModel: HomeViewModel
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.HomeScreen.route
+    ) {
+        composable(route = Screen.HomeScreen.route) {
+            HomeScreen(
+                viewModel = homeViewModel,
+                onPlaceClick = { placeId ->
+                    navController.navigate(Screen.Details.createRoute(placeId))
+                }
+            )
         }
     }
-
 }
