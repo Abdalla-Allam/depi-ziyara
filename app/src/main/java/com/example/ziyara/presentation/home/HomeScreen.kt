@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -37,7 +37,7 @@ fun HomeScreen(
 ) {
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val filteredPlaces by viewModel.filteredPlaces.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     val categories = remember {
         listOf(
@@ -52,17 +52,6 @@ fun HomeScreen(
     val darkGreen = Color(0xFF0F4C43)
     val lightBeige = Color(0xFFF7F4EB)
     val goldAccent = Color(0xFFD4A373)
-
-    val displayedPlaces = remember(searchQuery, filteredPlaces) {
-        if (searchQuery.isBlank()) {
-            filteredPlaces
-        } else {
-            filteredPlaces.filter {
-                it.name.contains(searchQuery, ignoreCase = true) ||
-                        it.governorate.contains(searchQuery, ignoreCase = true)
-            }
-        }
-    }
 
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 160.dp),
@@ -123,7 +112,7 @@ fun HomeScreen(
 
                     OutlinedTextField(
                         value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        onValueChange = { viewModel.updateSearchQuery(it) },
                         placeholder = { Text("Search historical sites, museums, parks...", color = Color.Gray, fontSize = 14.sp) },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
                         modifier = Modifier
@@ -235,12 +224,11 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Popular Landmarks", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = darkGreen)
-                Text("${displayedPlaces.size} found", color = Color.Gray, fontSize = 14.sp)
+                Text("${filteredPlaces.size} found", color = Color.Gray, fontSize = 14.sp)
             }
         }
 
-        items(displayedPlaces, key = { it.id }) { place ->
-            val index = displayedPlaces.indexOf(place)
+        itemsIndexed(filteredPlaces, key = { _, place -> place.id }) { index, place ->
             PlaceCard(
                 place = place,
                 modifier = Modifier
@@ -308,7 +296,7 @@ fun PlaceCard(
                         .padding(8.dp)
                 ) {
                     Text(
-                        text = place.ticketPrice,
+                        text = if (place.ticketPrice == 0.0) "Free" else "${place.ticketPrice.toInt()} EGP",
                         color = Color.White,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,

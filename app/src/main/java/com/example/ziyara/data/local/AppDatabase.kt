@@ -13,12 +13,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [PlaceEntity::class], version = 1, exportSchema = false)
+@Database(entities = [PlaceEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun placeDao(): PlaceDao
 
-    // الـ POJO اللي بنقرا بيه الـ JSON
     data class Place(
         val id: Int,
         val name: String,
@@ -46,10 +45,9 @@ abstract class AppDatabase : RoomDatabase() {
                     .build()
                 INSTANCE = instance
 
-                // 💡 الحل السحري: بنخليه ينادي على الداتابيز في الخلفية فوراً عشان يجبر الـ onCreate تشتغل
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        instance.placeDao().getAllPlaces() // أو أي دالة Query عندك جوه الـ Dao لتهيئة قاعدة البيانات
+                        instance.openHelper.writableDatabase
                     } catch (e: Exception) {
                         Log.e("ZiyaraDebug", "Warmup failed", e)
                     }
@@ -64,11 +62,9 @@ abstract class AppDatabase : RoomDatabase() {
                 super.onCreate(db)
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        // 1. قراءة ملف الـ JSON
                         val jsonString = context.assets.open("places.json").bufferedReader().use { it.readText() }
                         val placeListarray = Gson().fromJson(jsonString, Array<Place>::class.java)
 
-                        // 2. تحويل البيانات لـ PlaceEntity
                         val entities = placeListarray?.map {
                             PlaceEntity(
                                 id = it.id,
@@ -79,26 +75,24 @@ abstract class AppDatabase : RoomDatabase() {
                                 longitude = it.longitude,
                                 description = it.description,
                                 imageUrl = it.imageUrl,
-                                ticketPrice = "Free",
+                                ticketPrice = 0.0,
                                 isFavorite = false
                             )
                         } ?: emptyList()
 
-                        // 3. الحل الهندسي: بنعمل Insert مباشرة جوه الـ db اللي متاح معانا في الـ onCreate
-                        // من غير ما ننادي على getDatabase() ونعمل Deadlock!
                         if (entities.isNotEmpty()) {
                             db.beginTransaction()
                             try {
                                 entities.forEach { place ->
                                     db.execSQL(
                                         """
-                                        INSERT OR IGNORE INTO places (id, name, governorate, category, latitude, longitude, description, imageUrl, ticketPrice, isFavorite) 
+                                        INSERT OR IGNORE INTO places (id, name, description, latitude, longitude, image_url, governorate, category, ticket_price, is_favorite) 
                                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                         """.trimIndent(),
                                         arrayOf(
-                                            place.id, place.name, place.governorate, place.category,
-                                            place.latitude, place.longitude, place.description,
-                                            place.imageUrl, place.ticketPrice, if (place.isFavorite) 1 else 0
+                                            place.id, place.name, place.description, place.latitude, place.longitude,
+                                            place.imageUrl, place.governorate, place.category, place.ticketPrice,
+                                            if (place.isFavorite) 1 else 0
                                         )
                                     )
                                 }
