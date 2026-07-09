@@ -12,9 +12,8 @@ import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
 
-@Database(entities = [PlaceEntity::class], version = 1, exportSchema = false)
+@Database(entities = [PlaceEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun placeDao(): PlaceDao
@@ -45,6 +44,15 @@ abstract class AppDatabase : RoomDatabase() {
                     .addCallback(DatabaseCallback(context.applicationContext))
                     .build()
                 INSTANCE = instance
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        instance.openHelper.writableDatabase
+                    } catch (e: Exception) {
+                        Log.e("ZiyaraDebug", "Warmup failed", e)
+                    }
+                }
+
                 instance
             }
         }
@@ -56,6 +64,7 @@ abstract class AppDatabase : RoomDatabase() {
                     try {
                         val jsonString = context.assets.open("places.json").bufferedReader().use { it.readText() }
                         val placeListarray = Gson().fromJson(jsonString, Array<Place>::class.java)
+
                         val entities = placeListarray?.map {
                             PlaceEntity(
                                 id = it.id,
@@ -66,14 +75,36 @@ abstract class AppDatabase : RoomDatabase() {
                                 longitude = it.longitude,
                                 description = it.description,
                                 imageUrl = it.imageUrl,
-                                ticketPrice = "Free",
+                                ticketPrice = 0.0,
                                 isFavorite = false
                             )
                         } ?: emptyList()
 
-                        getDatabase(context).placeDao().insertPlaces(entities)
+                        if (entities.isNotEmpty()) {
+                            db.beginTransaction()
+                            try {
+                                entities.forEach { place ->
+                                    db.execSQL(
+                                        """
+                                        INSERT OR IGNORE INTO places (id, name, description, latitude, longitude, image_url, governorate, category, ticket_price, is_favorite) 
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                        """.trimIndent(),
+                                        arrayOf(
+                                            place.id, place.name, place.description, place.latitude, place.longitude,
+                                            place.imageUrl, place.governorate, place.category, place.ticketPrice,
+                                            if (place.isFavorite) 1 else 0
+                                        )
+                                    )
+                                }
+                                db.setTransactionSuccessful()
+                                Log.d("ZiyaraDebug", "Prepopulation successfully inserted 14 places!")
+                            } finally {
+                                db.endTransaction()
+                            }
+                        }
                     } catch (e: Exception) {
-                        Log.e("ZiyaraDebug", "Prepopulation failed!", e)                    }
+                        Log.e("ZiyaraDebug", "Prepopulation failed!", e)
+                    }
                 }
             }
         }

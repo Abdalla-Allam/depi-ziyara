@@ -1,49 +1,60 @@
 package com.example.ziyara.presentation.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ziyara.data.local.entity.PlaceEntity
 import com.example.ziyara.data.repository.PlaceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val repository: PlaceRepository) : ViewModel() {
+class HomeViewModel(private val repository: PlaceRepository,val context: Context) : ViewModel() {
 
-    private val _places = MutableStateFlow<List<PlaceEntity>>(emptyList())
-    val places: StateFlow<List<PlaceEntity>> = _places.asStateFlow()
-
+    init {
+        viewModelScope.launch {
+            repository.prepopulateDatabase(context)
+        }
+    }
     private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
 
-    private val _filteredPlaces = MutableStateFlow<List<PlaceEntity>>(emptyList())
-    val filteredPlaces: StateFlow<List<PlaceEntity>> = _filteredPlaces.asStateFlow()
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    init {
-        observePlaces()
-    }
+    val places: StateFlow<List<PlaceEntity>> = repository.getAllPlaces()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-    private fun observePlaces() {
-        viewModelScope.launch {
-            repository.getAllPlaces().collect { allPlaces ->
-                _places.value = allPlaces
-                filterPlaces(_selectedCategory.value, allPlaces)
-            }
+    val filteredPlaces: StateFlow<List<PlaceEntity>> = combine(
+        places,
+        _selectedCategory,
+        _searchQuery
+    ) { placesList, category, query ->
+        placesList.filter { place ->
+            val matchesCategory = category == "All" || place.category.equals(category, ignoreCase = true)
+            val matchesQuery = query.isEmpty() || place.name.contains(query, ignoreCase = true) || place.governorate.contains(query, ignoreCase = true)
+            matchesCategory && matchesQuery
         }
-    }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     fun selectCategory(category: String) {
         _selectedCategory.value = category
-        filterPlaces(category, _places.value)
     }
 
-    private fun filterPlaces(category: String, allPlaces: List<PlaceEntity>) {
-        _filteredPlaces.value = if (category == "All") {
-            allPlaces
-        } else {
-            allPlaces.filter { it.category.equals(category, ignoreCase = true) }
-        }
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
     }
 
     fun toggleFavorite(place: PlaceEntity) {
