@@ -16,7 +16,11 @@ interface PlaceDao {
     @Query("SELECT * FROM places")
     fun getAllPlaces(): Flow<List<PlaceEntity>>
 
-    @Query("SELECT * FROM places WHERE is_favorite = 1")
+    @Query("SELECT COUNT(*) FROM places")
+    suspend fun getCount(): Int
+
+
+    @Query("SELECT * FROM places WHERE isFavorite = 1")
     fun getFavoritePlaces(): Flow<List<PlaceEntity>>
 
     @Query("SELECT * FROM places WHERE id = :placeId")
