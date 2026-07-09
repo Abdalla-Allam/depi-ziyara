@@ -42,9 +42,13 @@ fun HomeScreen(
     val categories = remember {
         listOf(
             "All" to "🌍",
-            "Pharaonic" to "🏛️",
-            "Islamic" to "🕌",
-            "Museums" to "🖼️",
+            "Temple" to "🏛️",
+            "Tomb" to "🪦",
+            "Museum" to "🖼️",
+            "Oasis" to "🌴",
+            "Historical Fortress" to "🏰",
+            "Market" to "🧺",
+            "National Park" to "🌳",
             "Nature" to "🌴"
         )
     }
