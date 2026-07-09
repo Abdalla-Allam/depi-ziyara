@@ -1,15 +1,18 @@
 package com.example.ziyara.presentation.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ziyara.data.local.entity.PlaceEntity
 import com.example.ziyara.data.repository.PlaceRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val repository: PlaceRepository) : ViewModel() {
+class HomeViewModel(private val repository: PlaceRepository,val context: Context) : ViewModel() {
 
     private val _places = MutableStateFlow<List<PlaceEntity>>(emptyList())
     val places: StateFlow<List<PlaceEntity>> = _places.asStateFlow()
@@ -20,8 +23,12 @@ class HomeViewModel(private val repository: PlaceRepository) : ViewModel() {
     private val _filteredPlaces = MutableStateFlow<List<PlaceEntity>>(emptyList())
     val filteredPlaces: StateFlow<List<PlaceEntity>> = _filteredPlaces.asStateFlow()
 
+
     init {
+        CoroutineScope(Dispatchers.IO).launch {
+            repository.pepopulateDatabase(context)
         observePlaces()
+    }
     }
 
     private fun observePlaces() {
