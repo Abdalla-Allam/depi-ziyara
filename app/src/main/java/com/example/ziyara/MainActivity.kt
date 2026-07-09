@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
 
         val database = AppDatabase.getDatabase(applicationContext)
         val repository = PlaceRepository(database.placeDao())
-        val factory = HomeViewModelFactory(repository)
+        val factory = HomeViewModelFactory(repository,applicationContext)
         val homeViewModel: HomeViewModel by viewModels { factory }
 
         setContent {
