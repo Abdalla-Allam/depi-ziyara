@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import com.example.ziyara.data.local.AppDatabase
 import com.example.ziyara.data.repository.PlaceRepository
-import com.example.ziyara.presentation.home.HomeScreen
+import com.example.ziyara.navigation.AppNavigation
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.home.HomeViewModelFactory
 import com.example.ziyara.ui.theme.ZiyaraTheme
@@ -30,10 +30,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(
-                        viewModel = homeViewModel,
-                        onPlaceClick = { placeId -> }
-                    )
+                    AppNavigation(homeViewModel = homeViewModel)
                 }
             }
         }
