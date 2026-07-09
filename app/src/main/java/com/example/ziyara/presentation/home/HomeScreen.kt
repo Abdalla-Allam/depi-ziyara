@@ -45,6 +45,7 @@ fun HomeScreen(
             "Temple" to "🏛️",
             "Tomb" to "🪦",
             "Museum" to "🖼️",
+            "Pyramid" to "🛕",
             "Oasis" to "🌴",
             "Historical Fortress" to "🏰",
             "Market" to "🧺",
