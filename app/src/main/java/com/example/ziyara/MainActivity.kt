@@ -31,10 +31,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // 1. بنعرف الـ navController اللي هيتحكم في التنقل بين الشاشات
                     val navController = rememberNavController()
-
-                    // 2. بننادي على الـ AppNavigation وبنمررله الـ controller والـ viewModel
                     AppNavigation(
                         navController = navController,
                         homeViewModel = homeViewModel
