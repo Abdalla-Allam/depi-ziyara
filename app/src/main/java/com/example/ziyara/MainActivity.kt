@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // build database direct to avoid getinstance error
+        // init db & repo with factory (team updates)
         val database = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java, "ziyara_database"
@@ -38,6 +38,16 @@ class MainActivity : ComponentActivity() {
             ZiyaraTheme {
                 // navigation state
                 var selectedTab by remember { mutableStateOf("home") }
+
+                // dummy data le-shashet el favorites
+                val mockFavoritePlaces = remember {
+                    listOf(
+                        FavoritesPlaceItem(id = 1, name = "Giza Pyramids", rating = "4.8"),
+                        FavoritesPlaceItem(id = 2, name = "The Egyptian Museum", rating = "4.9"),
+                        FavoritesPlaceItem(id = 3, name = "Karnak Temple", rating = "4.7"),
+                        FavoritesPlaceItem(id = 4, name = "Qaitbay Citadel", rating = "4.6")
+                    )
+                }
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -74,6 +84,10 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             "favorites" -> {
+                                FavoritesScreen(
+                                    favoritePlaces = mockFavoritePlaces,
+                                    onPlaceClick = { placeId -> selectedTab = "home" }
+                                )
                             }
                         }
                     }
