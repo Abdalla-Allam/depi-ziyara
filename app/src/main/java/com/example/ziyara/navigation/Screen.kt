@@ -138,9 +138,14 @@ fun AppNavigation(
                                     },
                                     icon = { Icon(icons[index], contentDescription = null) },
                                     label = { Text(screen.route.replaceFirstChar { it.uppercase() }) },
+
                                     colors = NavigationBarItemDefaults.colors(
                                         selectedIconColor = darkGreen,
-                                        unselectedIconColor = Color.Gray
+                                        unselectedIconColor = Color.Gray,
+                                        selectedTextColor = darkGreen,
+                                        unselectedTextColor = Color.Gray,
+
+                                        indicatorColor = Color.Transparent
                                     )
                                 )
                             }
