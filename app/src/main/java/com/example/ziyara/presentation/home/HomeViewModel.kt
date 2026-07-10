@@ -5,21 +5,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ziyara.data.local.entity.PlaceEntity
 import com.example.ziyara.data.repository.PlaceRepository
+import com.example.ziyara.presentation.PlaceUiState // تأكد من استيراد الـ Sealed Class الخاص بك
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map // ضروري جداً للتحويل
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val repository: PlaceRepository,val context: Context) : ViewModel() {
+class HomeViewModel(private val repository: PlaceRepository, val context: Context) : ViewModel() {
 
     init {
         viewModelScope.launch {
             repository.prepopulateDatabase(context)
         }
     }
+
     private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
 
@@ -47,6 +50,15 @@ class HomeViewModel(private val repository: PlaceRepository,val context: Context
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
+    )
+
+    //  Sealed Class
+    val uiState: StateFlow<PlaceUiState> = filteredPlaces.map { list ->
+        PlaceUiState.Success(list) as PlaceUiState
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = PlaceUiState.Loading
     )
 
     fun selectCategory(category: String) {
