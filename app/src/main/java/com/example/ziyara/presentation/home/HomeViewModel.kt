@@ -21,15 +21,19 @@ class HomeViewModel(private val repository: PlaceRepository, val context: Contex
 
     private val appContext = context.applicationContext
 
+    // Manage UI state for category filtering
     private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
 
+    // Manage search input
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    // Random featured place to show on home
     private val _featuredPlace = MutableStateFlow<PlaceEntity?>(null)
     val featuredPlace: StateFlow<PlaceEntity?> = _featuredPlace.asStateFlow()
 
+    // Get all places from database
     val places: StateFlow<List<PlaceEntity>> = repository.getAllPlaces()
         .stateIn(
             scope = viewModelScope,
@@ -37,6 +41,7 @@ class HomeViewModel(private val repository: PlaceRepository, val context: Contex
             initialValue = emptyList()
         )
 
+    // Filter list based on category and search text
     val filteredPlaces: StateFlow<List<PlaceEntity>> = combine(
         places,
         _selectedCategory,
@@ -53,6 +58,7 @@ class HomeViewModel(private val repository: PlaceRepository, val context: Contex
         initialValue = emptyList()
     )
 
+    // Convert data to success UI state
     val uiState: StateFlow<PlaceUiState> = filteredPlaces.map { list ->
         PlaceUiState.Success(list) as PlaceUiState
     }.stateIn(
@@ -62,10 +68,12 @@ class HomeViewModel(private val repository: PlaceRepository, val context: Contex
     )
 
     init {
+        // Load initial data
         viewModelScope.launch {
             repository.prepopulateDatabase(appContext)
         }
 
+        // Cycle through featured places every 30 seconds
         viewModelScope.launch {
             places.collectLatest { placesList ->
                 if (placesList.isNotEmpty()) {

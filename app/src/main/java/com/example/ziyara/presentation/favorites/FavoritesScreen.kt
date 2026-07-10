@@ -27,9 +27,7 @@ import coil.request.ImageRequest
 import com.example.ziyara.data.local.entity.PlaceEntity
 import java.util.Locale
 
-enum class SortType {
-    DEFAULT, PRICE_LOW_HIGH, PRICE_HIGH_LOW, RATING_LOW_HIGH, RATING_HIGH_LOW
-}
+enum class SortType { DEFAULT, PRICE_LOW_HIGH, PRICE_HIGH_LOW, RATING_LOW_HIGH, RATING_HIGH_LOW }
 
 private fun calculateRating(id: Int): Double {
     val calculated = 4.0 + ((id * 3) % 10) / 10.0
@@ -45,10 +43,6 @@ fun FavoritesScreen(
     onClearAllClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val lightBeige = Color(0xFFF7F4EB)
-    val darkGreen = Color(0xFF0F4C43)
-    val goldAccent = Color(0xFFD4A373)
-
     var sortType by remember { mutableStateOf(SortType.DEFAULT) }
     var showSortMenu by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
@@ -66,37 +60,25 @@ fun FavoritesScreen(
     if (showClearDialog) {
         AlertDialog(
             onDismissRequest = { showClearDialog = false },
-            containerColor = Color.White,
-            title = { Text("Clear All Favorites", color = darkGreen, fontWeight = FontWeight.Bold) },
-            text = { Text("Are you sure you want to remove all places from your favorites?", color = Color.Gray) },
+            title = { Text("Clear All Favorites") },
+            text = { Text("Are you sure you want to remove all places from your favorites?") },
             confirmButton = {
-                TextButton(onClick = {
-                    onClearAllClick()
-                    showClearDialog = false
-                }) {
-                    Text("Clear All", color = Color.Red, fontWeight = FontWeight.Bold)
+                TextButton(onClick = { onClearAllClick(); showClearDialog = false }) {
+                    Text("Clear All", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showClearDialog = false }) {
-                    Text("Cancel", color = darkGreen)
-                }
+                TextButton(onClick = { showClearDialog = false }) { Text("Cancel") }
             }
         )
     }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = lightBeige,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = "Favorite Places",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                },
+                title = { Text("Favorite Places", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -108,86 +90,33 @@ fun FavoritesScreen(
                             IconButton(onClick = { showSortMenu = true }) {
                                 Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort")
                             }
-                            DropdownMenu(
-                                expanded = showSortMenu,
-                                onDismissRequest = { showSortMenu = false },
-                                modifier = Modifier.background(Color.White)
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Default", color = darkGreen) },
-                                    onClick = { sortType = SortType.DEFAULT; showSortMenu = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Price: Low to High", color = darkGreen) },
-                                    onClick = { sortType = SortType.PRICE_LOW_HIGH; showSortMenu = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Price: High to Low", color = darkGreen) },
-                                    onClick = { sortType = SortType.PRICE_HIGH_LOW; showSortMenu = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Rating: Low to High", color = darkGreen) },
-                                    onClick = { sortType = SortType.RATING_LOW_HIGH; showSortMenu = false }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Rating: High to Low", color = darkGreen) },
-                                    onClick = { sortType = SortType.RATING_HIGH_LOW; showSortMenu = false }
-                                )
+                            DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
+                                val options = listOf("Default" to SortType.DEFAULT, "Price: Low to High" to SortType.PRICE_LOW_HIGH, "Price: High to Low" to SortType.PRICE_HIGH_LOW, "Rating: Low to High" to SortType.RATING_LOW_HIGH, "Rating: High to Low" to SortType.RATING_HIGH_LOW)
+                                options.forEach { (text, type) ->
+                                    DropdownMenuItem(text = { Text(text) }, onClick = { sortType = type; showSortMenu = false })
+                                }
                             }
                         }
                         IconButton(onClick = { showClearDialog = true }) {
-
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Clear All", tint = darkGreen)
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Clear All", tint = MaterialTheme.colorScheme.error)
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = lightBeige,
-                    titleContentColor = darkGreen,
-                    navigationIconContentColor = darkGreen,
-                    actionIconContentColor = darkGreen
-                )
+                }
             )
         }
     ) { paddingValues ->
         if (sortedPlaces.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "No favorite places yet.",
-                        color = darkGreen,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Explore the home screen and add some!",
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
-                }
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                Text("No favorite places yet.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             }
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = paddingValues.calculateTopPadding()),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
+                modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding()),
+                contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-
-                items(sortedPlaces, key = { it.id }, contentType = { "FavoritePlaceItem" }) { place ->
-                    FavoritePlaceItem(
-                        place = place,
-                        onPlaceClick = onPlaceClick,
-                        darkGreen = darkGreen,
-                        goldAccent = goldAccent
-                    )
+                items(sortedPlaces, key = { it.id }) { place ->
+                    FavoritePlaceItem(place = place, onPlaceClick = onPlaceClick)
                 }
             }
         }
@@ -195,103 +124,34 @@ fun FavoritesScreen(
 }
 
 @Composable
-fun FavoritePlaceItem(
-    place: PlaceEntity,
-    onPlaceClick: (Int) -> Unit,
-    darkGreen: Color,
-    goldAccent: Color,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-
-    val imageRequest = remember(place.imageUrl) {
-        ImageRequest.Builder(context)
-            .data(place.imageUrl)
-            .crossfade(true)
-            .build()
-    }
-
-    val displayRating = remember(place.id) {
-        String.format(Locale.US, "%.1f", calculateRating(place.id))
-    }
-
-    val ticketText = remember(place.ticketPrice) {
-        if (place.ticketPrice == 0.0) "Free" else "${place.ticketPrice.toInt()} EGP"
-    }
-
+fun FavoritePlaceItem(place: PlaceEntity, onPlaceClick: (Int) -> Unit, modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onPlaceClick(place.id) },
+        modifier = modifier.fillMaxWidth().clickable { onPlaceClick(place.id) },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface) // 🌟 هنا التغيير الأساسي
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
-                model = imageRequest,
-                contentDescription = place.name,
-                modifier = Modifier
-                    .size(90.dp)
-                    .clip(RoundedCornerShape(16.dp)),
+                model = ImageRequest.Builder(LocalContext.current).data(place.imageUrl).crossfade(true).build(),
+                contentDescription = null,
+                modifier = Modifier.size(90.dp).clip(RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop
             )
-
             Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = place.name,
-                    color = darkGreen,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = "📍 ${place.governorate}",
-                    color = Color.Gray,
-                    fontSize = 12.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
+            Column(modifier = Modifier.weight(1f)) {
+                Text(place.name, color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text("📍 ${place.governorate}", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(10.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        color = darkGreen,
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Surface(color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp)) {
                         Text(
-                            text = ticketText,
-                            color = Color.White,
+                            text = if (place.ticketPrice == 0.0) "Free" else "${place.ticketPrice.toInt()} EGP",
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
-
-                    Text(
-                        text = "⭐ $displayRating",
-                        color = goldAccent,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
-                    )
+                    Text("⭐ ${calculateRating(place.id)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
         }
