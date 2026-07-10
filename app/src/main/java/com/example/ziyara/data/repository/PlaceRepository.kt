@@ -20,28 +20,47 @@ class PlaceRepository(private val placeDao: PlaceDao) {
     suspend fun toggleFavorite(placeId: Int, isFavorite: Boolean) {
         placeDao.updateFavoriteStatus(placeId, isFavorite)
     }
-    suspend fun prepopulateDatabase(context: Context){
-        val currentCount=placeDao.getPlacesCount()
-        if (currentCount==0){
+
+    suspend fun clearAllFavorites() {
+        placeDao.clearAllFavorites()
+    }
+
+    suspend fun prepopulateDatabase(context: Context) {
+        val currentCount = placeDao.getPlacesCount()
+        if (currentCount == 0) {
             val jsonString = context.assets.open("places.json").bufferedReader().use { it.readText() }
             val placeListarray = Gson().fromJson(jsonString, Array<Place>::class.java)
 
-            val entities = placeListarray.map {
+            val entities = placeListarray.map { place ->
+                val categoryLower = place.category.lowercase().trim()
+                val nameLower = place.name.lowercase()
+
+                val calculatedPrice = when {
+                    categoryLower.contains("market") || categoryLower.contains("nature") ||
+                            categoryLower.contains("park") || categoryLower.contains("oasis") ||
+                            nameLower.contains("khan el") -> 0.0
+
+                    categoryLower.contains("museum") || categoryLower.contains("temple") ||
+                            categoryLower.contains("pyramid") || nameLower.contains("museum") ||
+                            nameLower.contains("pyramids") -> listOf(40.0, 60.0, 80.0, 100.0).random()
+
+                    else -> listOf(30.0, 50.0, 60.0).random()
+                }
+
                 PlaceEntity(
-                    id = it.id,
-                    name = it.name,
-                    governorate = it.governorate,
-                    category = it.category,
-                    latitude = it.latitude,
-                    longitude = it.longitude,
-                    description = it.description,
-                    imageUrl = it.imageUrl,
-                    ticketPrice = 0.0,
+                    id = place.id,
+                    name = place.name,
+                    governorate = place.governorate,
+                    category = place.category,
+                    latitude = place.latitude,
+                    longitude = place.longitude,
+                    description = place.description,
+                    imageUrl = place.imageUrl,
+                    ticketPrice = calculatedPrice,
                     isFavorite = false
                 )
             }
             placeDao.insertPlaces(entities)
-
         }
     }
 }
