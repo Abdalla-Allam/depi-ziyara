@@ -1,3 +1,4 @@
+
 package com.example.ziyara.navigation
 
 import androidx.compose.foundation.background
@@ -20,6 +21,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.ziyara.presentation.PlaceUiState
+import com.example.ziyara.presentation.details.PlaceDetailsScreen
 import com.example.ziyara.presentation.home.HomeScreen
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.favorites.FavoritesScreen
@@ -83,10 +85,23 @@ fun AppNavigation(
                         composable(route = Screen.MapScreen.route) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Map Screen") }
                         }
-                        composable(route = Screen.Details.route, arguments = listOf(navArgument("placeId") { type = NavType.IntType })) { backStackEntry ->
+
+                        composable(
+                            route = Screen.Details.route,
+                            arguments = listOf(navArgument("placeId") { type = NavType.IntType })
+                        ) { backStackEntry ->
                             val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Details: $placeId") }
+
+                            PlaceDetailsScreen(
+                                placeId = placeId,
+                                viewModel = homeViewModel, // مررنا الـ ViewModel هنا
+                                onBackClick = {
+                                    navController.popBackStack()
+                                },
+
+                                )
                         }
+
                     }
 
                     // Bottom Navigation bar logic
