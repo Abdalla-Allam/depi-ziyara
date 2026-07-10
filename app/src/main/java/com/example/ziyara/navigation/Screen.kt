@@ -1,3 +1,4 @@
+
 package com.example.ziyara.navigation
 
 import androidx.compose.foundation.background
@@ -19,12 +20,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.example.ziyara.presentation.details.PlaceDetailsScreen
 import com.example.ziyara.presentation.PlaceUiState
+import com.example.ziyara.presentation.details.PlaceDetailsScreen
 import com.example.ziyara.presentation.home.HomeScreen
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.favorites.FavoritesScreen
-import com.example.ziyara.presentation.maps.MapsScreen
 
 // Define our app screens
 sealed class Screen(val route: String) {
@@ -82,8 +82,13 @@ fun AppNavigation(
                         composable(route = Screen.Favorites.route) {
                             FavoritesScreen(favoritePlaces, { navController.navigate(Screen.Details.createRoute(it)) }, { navController.popBackStack() })
                         }
-
-
+                        composable(route = Screen.MapScreen.route) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Map Screen") }
+                        }
+                        composable(route = Screen.Details.route, arguments = listOf(navArgument("placeId") { type = NavType.IntType })) { backStackEntry ->
+                            val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Details: $placeId") }
+                        }
                         composable(
                             route = Screen.Details.route,
                             arguments = listOf(navArgument("placeId") { type = NavType.IntType })
@@ -99,44 +104,25 @@ fun AppNavigation(
 
                                 )
                         }
-                        composable (route= Screen.MapScreen.route){
-                            MapsScreen(homeViewModel)
-                        }
+
                     }
-
-
 
                     // Bottom Navigation bar logic
                     if (currentRoute != Screen.WelcomeScreen.route && currentRoute?.startsWith("details") == false) {
                         NavigationBar(
                             containerColor = Color.White,
                             contentColor = darkGreen,
-                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
-                                .shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                         ) {
-                            val items =
-                                listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
-                            val icons = listOf(
-                                Icons.Default.Home,
-                                Icons.Default.LocationOn,
-                                Icons.Default.Favorite
-                            )
+                            val items = listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
+                            val icons = listOf(Icons.Default.Home, Icons.Default.LocationOn, Icons.Default.Favorite)
                             items.forEachIndexed { index, screen ->
                                 NavigationBarItem(
-                                    selected = currentRoute?.startsWith(screen.route) == true,                                    onClick = {
-                                        navController.navigate(screen.route) {
-                                            popUpTo(
-                                                navController.graph.findStartDestination().id
-                                            ) { saveState = true }; launchSingleTop =
-                                            true; restoreState = true
-                                        }
-                                    },
+                                    selected = currentRoute == screen.route,
+                                    onClick = { navController.navigate(screen.route) { popUpTo(navController.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true } },
                                     icon = { Icon(icons[index], contentDescription = null) },
                                     label = { Text(screen.route.replaceFirstChar { it.uppercase() }) },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = darkGreen,
-                                        unselectedIconColor = Color.Gray
-                                    )
+                                    colors = NavigationBarItemDefaults.colors(selectedIconColor = darkGreen, unselectedIconColor = Color.Gray)
                                 )
                             }
                         }
