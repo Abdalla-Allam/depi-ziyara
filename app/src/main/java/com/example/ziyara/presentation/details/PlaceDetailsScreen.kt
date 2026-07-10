@@ -93,19 +93,7 @@ fun PlaceDetailsScreen(
                         )
                     }
 
-                    IconButton(
-                        onClick = { /* Share action */ },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 48.dp, end = 24.dp)
-                            .background(Color.Black.copy(alpha = 0.4f), CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = "Share",
-                            tint = Color.White
-                        )
-                    }
+
 
                     Box(
                         modifier = Modifier
