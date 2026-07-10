@@ -1,7 +1,5 @@
 package com.example.ziyara.navigation
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,24 +13,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.example.ziyara.data.OnboardingPreferences
 import com.example.ziyara.presentation.PlaceUiState
 import com.example.ziyara.presentation.home.HomeScreen
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.favorites.FavoritesScreen
-import com.example.ziyara.presentation.Onboarding.OnboardingScreen
-import kotlinx.coroutines.launch
 
 // Define our app screens
 sealed class Screen(val route: String) {
-    object Onboarding : Screen("onboarding")
     object WelcomeScreen : Screen("welcome")
     object HomeScreen : Screen("home")
     object MapScreen : Screen("map")
@@ -44,14 +37,11 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavigation(
-    navController: NavHostController, homeViewModel: HomeViewModel
+    navController: NavHostController,
+    homeViewModel: HomeViewModel
 ) {
+    // Get the latest UI state from our ViewModel
     val uiState by homeViewModel.uiState.collectAsState()
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
-    val onboardingCompleted by OnboardingPreferences.isOnboardingCompleted(context)
-        .collectAsState(initial = null)
 
     val darkGreen = Color(0xFF0F4C43)
     val goldAccent = Color(0xFFD4A373)
@@ -59,111 +49,62 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val hideBottomBarRoutes =
-        listOf(Screen.Onboarding.route, Screen.WelcomeScreen.route)
-
-    // لسه بننتظر نعرف حالة الـ onboarding أو الداتا لسه بتتحمل
-    if (onboardingCompleted == null || uiState is PlaceUiState.Loading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
-
+    // Handle different UI states based on the sealed class
     when (val state = uiState) {
 
+        // While data is loading, show a spinner
+        is PlaceUiState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+
+        // When data is ready, show the main screens
         is PlaceUiState.Success -> {
             val allPlaces = state.places
             val favoritePlaces = allPlaces.filter { it.isFavorite }
 
-            val startDestination = if (onboardingCompleted == true) {
-                Screen.HomeScreen.route
-            } else {
-                Screen.Onboarding.route
-            }
-
             Scaffold { innerPadding ->
                 Box(modifier = Modifier.fillMaxSize()) {
+                    // Set up navigation between screens
                     NavHost(
                         navController = navController,
-                        startDestination = startDestination,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = innerPadding.calculateBottomPadding())
+                        startDestination = Screen.HomeScreen.route,
+                        modifier = Modifier.fillMaxSize().padding(bottom = innerPadding.calculateBottomPadding())
                     ) {
-                        composable(route = Screen.Onboarding.route) {
-                            OnboardingScreen(
-                                onFinished = {
-                                    scope.launch {
-                                        OnboardingPreferences.setOnboardingCompleted(context)
-                                        navController.navigate(Screen.HomeScreen.route) {
-                                            popUpTo(Screen.Onboarding.route) { inclusive = true }
-                                        }
-                                    }
-                                })
-                        }
-
                         composable(route = Screen.HomeScreen.route) {
                             HomeScreen(viewModel = homeViewModel) { placeId ->
                                 navController.navigate(Screen.Details.createRoute(placeId))
                             }
                         }
                         composable(route = Screen.Favorites.route) {
-                            FavoritesScreen(
-                                favoritePlaces,
-                                { navController.navigate(Screen.Details.createRoute(it)) },
-                                { navController.popBackStack() })
+                            FavoritesScreen(favoritePlaces, { navController.navigate(Screen.Details.createRoute(it)) }, { navController.popBackStack() })
                         }
                         composable(route = Screen.MapScreen.route) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) { Text("Map Screen") }
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Map Screen") }
                         }
-                        composable(
-                            route = Screen.Details.route,
-                            arguments = listOf(navArgument("placeId") { type = NavType.IntType })
-                        ) { backStackEntry ->
+                        composable(route = Screen.Details.route, arguments = listOf(navArgument("placeId") { type = NavType.IntType })) { backStackEntry ->
                             val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) { Text("Details: $placeId") }
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Details: $placeId") }
                         }
                     }
 
                     // Bottom Navigation bar logic
-                    if (currentRoute !in hideBottomBarRoutes && currentRoute?.startsWith("details") == false) {
+                    if (currentRoute != Screen.WelcomeScreen.route && currentRoute?.startsWith("details") == false) {
                         NavigationBar(
                             containerColor = Color.White,
                             contentColor = darkGreen,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter)
-                                .shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                         ) {
-                            val items =
-                                listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
-                            val icons = listOf(
-                                Icons.Default.Home, Icons.Default.LocationOn, Icons.Default.Favorite
-                            )
+                            val items = listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
+                            val icons = listOf(Icons.Default.Home, Icons.Default.LocationOn, Icons.Default.Favorite)
                             items.forEachIndexed { index, screen ->
                                 NavigationBarItem(
                                     selected = currentRoute == screen.route,
-                                    onClick = {
-                                        navController.navigate(screen.route) {
-                                            popUpTo(
-                                                navController.graph.findStartDestination().id
-                                            ) { saveState = true }; launchSingleTop =
-                                            true; restoreState = true
-                                        }
-                                    },
+                                    onClick = { navController.navigate(screen.route) { popUpTo(navController.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true } },
                                     icon = { Icon(icons[index], contentDescription = null) },
                                     label = { Text(screen.route.replaceFirstChar { it.uppercase() }) },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = darkGreen,
-                                        unselectedIconColor = Color.Gray
-                                    )
+                                    colors = NavigationBarItemDefaults.colors(selectedIconColor = darkGreen, unselectedIconColor = Color.Gray)
                                 )
                             }
                         }
@@ -172,12 +113,11 @@ fun AppNavigation(
             }
         }
 
+        // Show an error message if something goes wrong
         is PlaceUiState.Error -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Error: ${state.message}")
             }
         }
-
-        else -> Unit
     }
 }
