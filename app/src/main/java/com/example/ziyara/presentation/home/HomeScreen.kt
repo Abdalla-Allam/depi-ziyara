@@ -5,13 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -23,25 +21,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import coil.size.Precision
 import com.example.ziyara.data.local.entity.PlaceEntity
 import com.example.ziyara.presentation.PlaceUiState
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.ziyara.utils.AppStrings
 
 @Composable
 fun HomeScreen(
@@ -56,38 +46,28 @@ fun HomeScreen(
     val featuredPlace by viewModel.featuredPlace.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
-    val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-
     val categories = remember {
         listOf("All" to "🌍", "Temple" to "🏛️", "Tomb" to "🪦", "Museum" to "🖼️", "Pyramid" to "🛕", "Oasis" to "🌴", "Historical Fortress" to "🏰", "Market" to "🧺", "National Park" to "🌳", "Nature" to "🌴")
     }
 
-    // 🌟 تعريف ألوان أساسية للمناطق اللي لازم تفضل ثابتة
     val brandGreen = Color(0xFF0F4C43)
     val goldAccent = Color(0xFFD4A373)
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(1),
+        columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(1),
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(bottom = 90.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(brandGreen, shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
-                    .statusBarsPadding()
-                    .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 32.dp)
-            ) {
+            Box(modifier = Modifier.fillMaxWidth().background(brandGreen, shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)).statusBarsPadding().padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 32.dp)) {
                 Column {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column {
-                            Text("Ziyara", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                            Text(if (currentLanguage == "EN") "Discover Egypt" else "اكتشف مصر", color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
+                            Text(AppStrings.getZiyara(currentLanguage), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                            Text(AppStrings.getDiscoverEgypt(currentLanguage), color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp)
                         }
                         IconButton(onClick = onNavigateToSettings, modifier = Modifier.background(Color.White.copy(alpha = 0.15f), shape = RoundedCornerShape(16.dp)).size(40.dp)) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(20.dp))
@@ -97,26 +77,13 @@ fun HomeScreen(
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { viewModel.updateSearchQuery(it) },
-                        placeholder = { Text(if (currentLanguage == "EN") "Search..." else "ابحث...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontSize = 14.sp) },
+                        placeholder = { Text(AppStrings.getSearchPlaceholder(currentLanguage), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontSize = 14.sp) },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)) },
-                        trailingIcon = {
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { viewModel.updateSearchQuery(""); focusManager.clearFocus() }) {
-                                    Icon(Icons.Default.Clear, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
-                                }
-                            }
-                        },
+                        trailingIcon = { if (searchQuery.isNotEmpty()) { IconButton(onClick = { viewModel.updateSearchQuery(""); focusManager.clearFocus() }) { Icon(Icons.Default.Clear, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface) } } },
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         modifier = Modifier.fillMaxWidth().height(54.dp),
                         shape = RoundedCornerShape(27.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface, // متغير حسب المود
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface, // متغير حسب المود
-                            focusedBorderColor = Color.Transparent,
-                            unfocusedBorderColor = Color.Transparent
-                        )
+                        colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = MaterialTheme.colorScheme.surface, unfocusedContainerColor = MaterialTheme.colorScheme.surface)
                     )
                 }
             }
@@ -127,11 +94,11 @@ fun HomeScreen(
                 Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = brandGreen)) {
                     Box(modifier = Modifier.fillMaxWidth().heightIn(min = 140.dp)) {
                         Column(modifier = Modifier.fillMaxWidth().padding(20.dp).padding(end = 100.dp), verticalArrangement = Arrangement.Center) {
-                            Text("✦ FEATURED DESTINATION", color = goldAccent, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
+                            Text(AppStrings.getFeaturedTitle(currentLanguage), color = goldAccent, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
                             Text(place.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp, maxLines = 2)
                         }
                         Button(onClick = { onPlaceClick(place.id) }, colors = ButtonDefaults.buttonColors(containerColor = goldAccent), modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp), shape = RoundedCornerShape(12.dp)) {
-                            Text("Explore ›", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(AppStrings.getExploreButton(currentLanguage), color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -140,13 +107,7 @@ fun HomeScreen(
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             Column(modifier = Modifier.padding(top = 8.dp)) {
-                Text(
-                    text = if (currentLanguage == "EN") "Explore by Type" else "استكشف حسب النوع",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(horizontal = 20.dp)
-                )
+                Text(text = AppStrings.getExploreByType(currentLanguage), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 20.dp))
                 Spacer(modifier = Modifier.height(12.dp))
                 CategorySelector(categories, selectedCategory, goldAccent, { viewModel.selectCategory(it) })
             }
@@ -187,7 +148,7 @@ fun PlaceCard(place: PlaceEntity, onClick: () -> Unit, onFavoriteClick: () -> Un
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp).clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface) // 🌟 لون الكارت المتغير
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column {
             Box(modifier = Modifier.fillMaxWidth().height(130.dp)) {

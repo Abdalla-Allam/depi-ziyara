@@ -43,13 +43,11 @@ fun AppNavigation(
     homeViewModel: HomeViewModel,
     currentLanguage: String,
     onLanguageChange: (String) -> Unit,
-    onNavigateToSettings: () -> Unit // 🌟 ده البراميتر اللي كان ناقص
+    onNavigateToSettings: () -> Unit
 ) {
 
     val uiState by homeViewModel.uiState.collectAsState()
-
     val darkGreen = Color(0xFF0F4C43)
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -75,7 +73,7 @@ fun AppNavigation(
                                 viewModel = homeViewModel,
                                 currentLanguage = currentLanguage,
                                 onLanguageChange = onLanguageChange,
-                                onNavigateToSettings = onNavigateToSettings, // 🌟 التمرير الصح
+                                onNavigateToSettings = onNavigateToSettings,
                                 onPlaceClick = { placeId ->
                                     navController.navigate(Screen.Details.createRoute(placeId))
                                 }
@@ -84,6 +82,7 @@ fun AppNavigation(
 
                         composable(route = Screen.Favorites.route) {
                             FavoritesScreen(
+                                currentLanguage = currentLanguage, // تم التعديل هنا
                                 favoritePlaces = favoritePlaces,
                                 onPlaceClick = { navController.navigate(Screen.Details.createRoute(it)) },
                                 onBackClick = { navController.popBackStack() },
