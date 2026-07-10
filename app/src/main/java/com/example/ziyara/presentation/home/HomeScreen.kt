@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -26,6 +26,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
@@ -34,7 +36,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.size.Precision
 import com.example.ziyara.data.local.entity.PlaceEntity
+import com.example.ziyara.presentation.PlaceUiState
 
 @Composable
 fun HomeScreen(
@@ -42,8 +47,10 @@ fun HomeScreen(
     onPlaceClick: (Int) -> Unit
 ) {
     val selectedCategory by viewModel.selectedCategory.collectAsState()
-    val filteredPlaces by viewModel.filteredPlaces.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val featuredPlace by viewModel.featuredPlace.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
@@ -67,7 +74,7 @@ fun HomeScreen(
     val goldAccent = Color(0xFFD4A373)
 
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 160.dp),
+        columns = GridCells.Fixed(1),
         modifier = Modifier
             .fillMaxSize()
             .background(lightBeige),
@@ -161,35 +168,39 @@ fun HomeScreen(
         }
 
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = darkGreen)
-            ) {
-                Box(modifier = Modifier.fillMaxWidth().heightIn(min = 140.dp)) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                            .padding(end = 100.dp),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text("✦ FEATURED DESTINATION", color = goldAccent, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("Discover\nAncient Egypt", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp, lineHeight = 26.sp)
-                    }
-                    Button(
-                        onClick = {},
-                        colors = ButtonDefaults.buttonColors(containerColor = goldAccent),
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(16.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                    ) {
-                        Text("Explore ›", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            featuredPlace?.let { place ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = darkGreen)
+                ) {
+                    Box(modifier = Modifier.fillMaxWidth().heightIn(min = 140.dp)) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                                .padding(end = 100.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text("✦ FEATURED DESTINATION", color = goldAccent, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(place.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp, lineHeight = 26.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text("Ready to step into history? Tap to unlock the story! ✨", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp, fontWeight = FontWeight.Normal)
+                        }
+                        Button(
+                            onClick = { onPlaceClick(place.id) },
+                            colors = ButtonDefaults.buttonColors(containerColor = goldAccent),
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(16.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            Text("Explore ›", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
                     }
                 }
             }
@@ -205,7 +216,6 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("Explore by Type", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = darkGreen)
-                    Text("See all", color = Color.Gray, fontSize = 14.sp)
                 }
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -214,36 +224,64 @@ fun HomeScreen(
                     selectedCategory = selectedCategory,
                     darkGreen = darkGreen,
                     goldAccent = goldAccent,
-                    onCategorySelected = { viewModel.selectCategory(it) }
+                    onCategorySelected = { viewModel.selectCategory(it) },
+                    modifier = Modifier.padding(horizontal = 20.dp)
                 )
             }
         }
 
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Popular Landmarks", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = darkGreen)
-                Text("${filteredPlaces.size} found", color = Color.Gray, fontSize = 14.sp)
+        when (uiState) {
+            is PlaceUiState.Loading -> {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 40.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = darkGreen)
+                    }
+                }
             }
-        }
+            is PlaceUiState.Success -> {
+                val placesList = (uiState as PlaceUiState.Success).places
 
-        itemsIndexed(filteredPlaces, key = { _, place -> place.id }) { index, place ->
-            PlaceCard(
-                place = place,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = if (index % 2 == 0) 20.dp else 0.dp,
-                        end = if (index % 2 != 0) 20.dp else 0.dp
-                    ),
-                onClick = { onPlaceClick(place.id) },
-                onFavoriteClick = { viewModel.toggleFavorite(place) }
-            )
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 20.dp, end = 20.dp, top = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Popular Landmarks", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = darkGreen)
+                        Text("${placesList.size} found", color = Color.Gray, fontSize = 14.sp)
+                    }
+                }
+
+                items(placesList, key = { place -> place.id }) { place ->
+                    PlaceCard(
+                        place = place,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        onClick = { onPlaceClick(place.id) },
+                        onFavoriteClick = { viewModel.toggleFavorite(place) }
+                    )
+                }
+            }
+            is PlaceUiState.Error -> {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 40.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Something went wrong", color = Color.Red, fontSize = 14.sp)
+                    }
+                }
+            }
         }
     }
 }
@@ -258,7 +296,6 @@ fun CategorySelector(
     modifier: Modifier = Modifier
 ) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = modifier
     ) {
@@ -304,14 +341,39 @@ fun PlaceCard(
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val density = LocalDensity.current
+
+    val ticketText = remember(place.ticketPrice) {
+        if (place.ticketPrice == 0.0) "Free" else "${place.ticketPrice.toInt()} EGP"
+    }
+
+
+    val displayRating = remember(place.id) {
+        val calculated = 4.0 + ((place.id * 3) % 10) / 10.0
+        if (calculated > 4.9) "4.8" else String.format("%.1f", calculated)
+    }
+
+    val widthPx = remember { with(density) { 320.dp.roundToPx() } }
+    val heightPx = remember { with(density) { 130.dp.roundToPx() } }
+
+    val imageRequest = remember(place.imageUrl) {
+        ImageRequest.Builder(context)
+            .data(place.imageUrl)
+            .crossfade(true)
+            .size(widthPx, heightPx)
+            .precision(Precision.EXACT)
+            .build()
+    }
+
     Card(
         modifier = modifier
+            .height(230.dp)
             .graphicsLayer {
                 shape = RoundedCornerShape(20.dp)
                 clip = true
             }
-            .clickable { onClick() }
-            .height(230.dp),
+            .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -323,7 +385,7 @@ fun PlaceCard(
                     .height(130.dp)
             ) {
                 AsyncImage(
-                    model = place.imageUrl,
+                    model = imageRequest,
                     contentDescription = place.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -353,7 +415,7 @@ fun PlaceCard(
                         .padding(8.dp)
                 ) {
                     Text(
-                        text = if (place.ticketPrice == 0.0) "Free" else "${place.ticketPrice.toInt()} EGP",
+                        text = ticketText,
                         color = Color.White,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -385,7 +447,7 @@ fun PlaceCard(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    Text(text = "⭐ 4.8", color = Color(0xFFD4A373), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                    Text(text = "⭐ $displayRating", color = Color(0xFFD4A373), fontWeight = FontWeight.Bold, fontSize = 11.sp)
                 }
             }
         }

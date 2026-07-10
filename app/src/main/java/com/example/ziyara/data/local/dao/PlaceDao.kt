@@ -15,8 +15,10 @@ interface PlaceDao {
 
     @Query("SELECT * FROM places")
     fun getAllPlaces(): Flow<List<PlaceEntity>>
+
     @Query("SELECT COUNT(*) FROM places")
     suspend fun getPlacesCount(): Int
+
     @Query("SELECT * FROM places WHERE is_favorite = 1")
     fun getFavoritePlaces(): Flow<List<PlaceEntity>>
 
@@ -28,4 +30,7 @@ interface PlaceDao {
 
     @Query("UPDATE places SET is_favorite = :isFav WHERE id = :placeId")
     suspend fun updateFavoriteStatus(placeId: Int, isFav: Boolean)
+
+    @Query("UPDATE places SET is_favorite = 0 WHERE is_favorite = 1")
+    suspend fun clearAllFavorites()
 }

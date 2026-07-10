@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,7 +34,6 @@ fun PlaceDetailsScreen(
     viewModel: HomeViewModel,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-
 ) {
     val allPlaces by viewModel.places.collectAsState(initial = emptyList())
     val place = allPlaces.find { it.id == placeId }
@@ -46,6 +46,11 @@ fun PlaceDetailsScreen(
             CircularProgressIndicator(color = Color(0xFFD4A373))
         }
         return
+    }
+
+    val displayRating = remember(place.id) {
+        val calculated = 4.0 + ((place.id * 3) % 10) / 10.0
+        if (calculated > 4.9) "4.8" else String.format("%.1f", calculated)
     }
 
     Box(
@@ -162,7 +167,6 @@ fun PlaceDetailsScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // جعلنا التوزيع انسيابياً (Weight) لكي لا تنضغط العناصر أفقياً على الشاشات الصغيرة
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -193,7 +197,7 @@ fun PlaceDetailsScreen(
                                 Text(text = "⭐", fontSize = 14.sp)
                             }
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = "4.7", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text(text = displayRating, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                             Text(text = " / 5.0", color = Color.Gray, fontSize = 14.sp)
                         }
 

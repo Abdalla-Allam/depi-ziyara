@@ -26,7 +26,7 @@ import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.favorites.FavoritesScreen
 import com.example.ziyara.presentation.maps.MapsScreen
 
-// Define our app screens
+
 sealed class Screen(val route: String) {
     object WelcomeScreen : Screen("welcome")
     object HomeScreen : Screen("home")
@@ -42,7 +42,7 @@ fun AppNavigation(
     navController: NavHostController,
     homeViewModel: HomeViewModel
 ) {
-    // Get the latest UI state from our ViewModel
+
     val uiState by homeViewModel.uiState.collectAsState()
 
     val darkGreen = Color(0xFF0F4C43)
@@ -51,24 +51,24 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Handle different UI states based on the sealed class
+
     when (val state = uiState) {
 
-        // While data is loading, show a spinner
+
         is PlaceUiState.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
 
-        // When data is ready, show the main screens
+
         is PlaceUiState.Success -> {
             val allPlaces = state.places
             val favoritePlaces = allPlaces.filter { it.isFavorite }
 
             Scaffold { innerPadding ->
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Set up navigation between screens
+
                     NavHost(
                         navController = navController,
                         startDestination = Screen.HomeScreen.route,
@@ -79,16 +79,20 @@ fun AppNavigation(
                                 navController.navigate(Screen.Details.createRoute(placeId))
                             }
                         }
+
                         composable(route = Screen.Favorites.route) {
-                            FavoritesScreen(favoritePlaces, { navController.navigate(Screen.Details.createRoute(it)) }, { navController.popBackStack() })
+                            FavoritesScreen(
+                                favoritePlaces = favoritePlaces,
+                                onPlaceClick = { navController.navigate(Screen.Details.createRoute(it)) },
+                                onBackClick = { navController.popBackStack() },
+                                onClearAllClick = { homeViewModel.clearAllFavorites() } // السطر ده هو اللي هيسمع في الابلكيشن كله!
+                            )
                         }
+
                         composable(route = Screen.MapScreen.route) {
                             MapsScreen(homeViewModel)
                         }
-                        composable(route = Screen.Details.route, arguments = listOf(navArgument("placeId") { type = NavType.IntType })) { backStackEntry ->
-                            val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Details: $placeId") }
-                        }
+
                         composable(
                             route = Screen.Details.route,
                             arguments = listOf(navArgument("placeId") { type = NavType.IntType })
@@ -97,20 +101,13 @@ fun AppNavigation(
 
                             PlaceDetailsScreen(
                                 placeId = placeId,
-                                viewModel = homeViewModel, // مررنا الـ ViewModel هنا
-                                onBackClick = {
-                                    navController.popBackStack()
-                                },
-
-                                )
-
-
+                                viewModel = homeViewModel,
+                                onBackClick = { navController.popBackStack() }
+                            )
                         }
                     }
 
 
-
-                    // Bottom Navigation bar logic
                     if (currentRoute != Screen.WelcomeScreen.route && currentRoute?.startsWith("details") == false) {
                         NavigationBar(
                             containerColor = Color.White,
@@ -118,33 +115,30 @@ fun AppNavigation(
                             modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
                                 .shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                         ) {
-                            val items =
-                                listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
+                            val items = listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
                             val icons = listOf(
                                 Icons.Default.Home,
                                 Icons.Default.LocationOn,
                                 Icons.Default.Favorite
                             )
+
                             items.forEachIndexed { index, screen ->
                                 NavigationBarItem(
                                     selected = currentRoute == screen.route,
                                     onClick = {
                                         navController.navigate(screen.route) {
-                                            popUpTo(
-                                                navController.graph.findStartDestination().id
-                                            ) { saveState = true }; launchSingleTop =
-                                            true; restoreState = true
+                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
                                     },
                                     icon = { Icon(icons[index], contentDescription = null) },
                                     label = { Text(screen.route.replaceFirstChar { it.uppercase() }) },
-
                                     colors = NavigationBarItemDefaults.colors(
                                         selectedIconColor = darkGreen,
                                         unselectedIconColor = Color.Gray,
                                         selectedTextColor = darkGreen,
                                         unselectedTextColor = Color.Gray,
-
                                         indicatorColor = Color.Transparent
                                     )
                                 )
@@ -155,7 +149,7 @@ fun AppNavigation(
             }
         }
 
-        // Show an error message if something goes wrong
+
         is PlaceUiState.Error -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Error: ${state.message}")
