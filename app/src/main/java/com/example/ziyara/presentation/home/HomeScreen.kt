@@ -39,7 +39,7 @@ import com.example.ziyara.data.local.entity.PlaceEntity
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onPlaceClick: (Int) -> Unit
+    onPlaceClick: (Int) -> Unit //compose bta3y
 ) {
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val filteredPlaces by viewModel.filteredPlaces.collectAsState()
