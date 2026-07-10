@@ -131,7 +131,8 @@ fun AppNavigation(
                         viewModel = homeViewModel, // مررنا الـ ViewModel هنا
                         onBackClick = {
                             navController.popBackStack()
-                        }
+                        },
+                        navController=navController
                     )
                 }
             }

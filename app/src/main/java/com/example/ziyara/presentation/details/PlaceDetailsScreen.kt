@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.ziyara.presentation.home.HomeViewModel
 
@@ -31,7 +32,8 @@ fun PlaceDetailsScreen(
     placeId: Int,
     viewModel: HomeViewModel,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
     val allPlaces by viewModel.places.collectAsState(initial = emptyList())
     val place = allPlaces.find { it.id == placeId }
@@ -198,7 +200,7 @@ fun PlaceDetailsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Button(
-                            onClick = { /* Open GPS */ },
+                            onClick = { /* Open GPS */ navController.navigate("MapsScreen") },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(54.dp),
