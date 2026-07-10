@@ -96,27 +96,11 @@ fun AppNavigation(
                                 onBackClick = {
                                     navController.popBackStack()
                                 },
-                                navController=navController
 
                                 )
-
-
                         }
-                        composable(
-                            route = "${Screen.MapScreen.route}?lat={lat}&lng={lng}",
-                            arguments = listOf(
-                                navArgument("lat") { type = NavType.StringType; nullable = true },
-                                navArgument("lng") { type = NavType.StringType; nullable = true }
-                            )
-                        ) { backStackEntry ->
-                            val lat = backStackEntry.arguments?.getString("lat")?.toDoubleOrNull()
-                            val lng = backStackEntry.arguments?.getString("lng")?.toDoubleOrNull()
-
-                            MapsScreen(
-                                viewModel = homeViewModel,
-                                initialLat = lat,
-                                initialLng = lng
-                            )
+                        composable (route= Screen.MapScreen.route){
+                            MapsScreen(homeViewModel)
                         }
                     }
 

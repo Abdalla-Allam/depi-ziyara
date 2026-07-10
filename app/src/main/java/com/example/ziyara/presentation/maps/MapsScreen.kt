@@ -29,23 +29,11 @@ fun MapsScreen(
     val cairo = LatLng(30.0444, 31.2357)
 
     val cameraPositionState = rememberCameraPositionState {
-        position = if (initialLat != null && initialLng != null) {
-            CameraPosition.fromLatLngZoom(LatLng(initialLat, initialLng), 14f)
-        } else {
-            CameraPosition.fromLatLngZoom(cairo, 11f)
-        }
+        position=CameraPosition.fromLatLngZoom(cairo, 11f)
+
     }
 
-    LaunchedEffect(initialLat, initialLng) {
-        if (initialLat != null && initialLng != null) {
-            val targetLocation = LatLng(initialLat, initialLng)
-            delay(500)
-            cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(targetLocation, 14f),
-                durationMs = 1500
-            )
-        }
-    }
+
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState
