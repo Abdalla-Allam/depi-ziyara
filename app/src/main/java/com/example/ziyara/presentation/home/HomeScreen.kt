@@ -44,7 +44,7 @@ import com.example.ziyara.presentation.PlaceUiState
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onPlaceClick: (Int) -> Unit
+    onPlaceClick: (Int) -> Unit //compose bta3y
 ) {
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
