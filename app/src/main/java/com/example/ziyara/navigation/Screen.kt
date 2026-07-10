@@ -1,7 +1,5 @@
-
 package com.example.ziyara.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,13 +24,14 @@ import com.example.ziyara.presentation.home.HomeScreen
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.favorites.FavoritesScreen
 import com.example.ziyara.presentation.maps.MapsScreen
-
+import com.example.ziyara.presentation.settings.SettingsScreen
 
 sealed class Screen(val route: String) {
     object WelcomeScreen : Screen("welcome")
     object HomeScreen : Screen("home")
     object MapScreen : Screen("map")
     object Favorites : Screen("favorites")
+    object Settings : Screen("settings")
     object Details : Screen("details/{placeId}") {
         fun createRoute(placeId: Int) = "details/$placeId"
     }
@@ -41,52 +40,53 @@ sealed class Screen(val route: String) {
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
+    currentLanguage: String,
+    onLanguageChange: (String) -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
 
     val uiState by homeViewModel.uiState.collectAsState()
-
     val darkGreen = Color(0xFF0F4C43)
-    val goldAccent = Color(0xFFD4A373)
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-
     when (val state = uiState) {
-
-
         is PlaceUiState.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
-
-
         is PlaceUiState.Success -> {
             val allPlaces = state.places
             val favoritePlaces = allPlaces.filter { it.isFavorite }
 
             Scaffold { innerPadding ->
                 Box(modifier = Modifier.fillMaxSize()) {
-
                     NavHost(
                         navController = navController,
                         startDestination = Screen.HomeScreen.route,
                         modifier = Modifier.fillMaxSize().padding(bottom = innerPadding.calculateBottomPadding())
                     ) {
                         composable(route = Screen.HomeScreen.route) {
-                            HomeScreen(viewModel = homeViewModel) { placeId ->
-                                navController.navigate(Screen.Details.createRoute(placeId))
-                            }
+                            HomeScreen(
+                                viewModel = homeViewModel,
+                                currentLanguage = currentLanguage,
+                                onLanguageChange = onLanguageChange,
+                                onNavigateToSettings = onNavigateToSettings,
+                                onPlaceClick = { placeId ->
+                                    navController.navigate(Screen.Details.createRoute(placeId))
+                                }
+                            )
                         }
 
                         composable(route = Screen.Favorites.route) {
                             FavoritesScreen(
+                                currentLanguage = currentLanguage, // تم التعديل هنا
                                 favoritePlaces = favoritePlaces,
                                 onPlaceClick = { navController.navigate(Screen.Details.createRoute(it)) },
                                 onBackClick = { navController.popBackStack() },
-                                onClearAllClick = { homeViewModel.clearAllFavorites() } // السطر ده هو اللي هيسمع في الابلكيشن كله!
+                                onClearAllClick = { homeViewModel.clearAllFavorites() }
                             )
                         }
 
@@ -94,37 +94,37 @@ fun AppNavigation(
                             MapsScreen(homeViewModel)
                         }
 
+                        composable(route = Screen.Settings.route) {
+                            SettingsScreen(
+                                currentLanguage = currentLanguage,
+                                onLanguageChange = onLanguageChange,
+                                onBackClick = { navController.popBackStack() }
+                            )
+                        }
+
                         composable(
                             route = Screen.Details.route,
                             arguments = listOf(navArgument("placeId") { type = NavType.IntType })
                         ) { backStackEntry ->
                             val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
-
                             PlaceDetailsScreen(
                                 placeId = placeId,
-                                viewModel = homeViewModel, // مررنا الـ ViewModel هنا
-                                onBackClick = {
-                                    navController.popBackStack()
-                                },
-
-                                )
+                                viewModel = homeViewModel,
+                                onBackClick = { navController.popBackStack() }
+                            )
                         }
-
                     }
 
-                    // Bottom Navigation bar logic
-                    if (currentRoute != Screen.WelcomeScreen.route && currentRoute?.startsWith("details") == false) {
+                    if (currentRoute != Screen.WelcomeScreen.route &&
+                        currentRoute?.startsWith("details") == false &&
+                        currentRoute != Screen.Settings.route) {
                         NavigationBar(
                             containerColor = Color.White,
                             contentColor = darkGreen,
                             modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                         ) {
                             val items = listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
-                            val icons = listOf(
-                                Icons.Default.Home,
-                                Icons.Default.LocationOn,
-                                Icons.Default.Favorite
-                            )
+                            val icons = listOf(Icons.Default.Home, Icons.Default.LocationOn, Icons.Default.Favorite)
 
                             items.forEachIndexed { index, screen ->
                                 NavigationBarItem(
@@ -152,8 +152,6 @@ fun AppNavigation(
                 }
             }
         }
-
-
         is PlaceUiState.Error -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Error: ${state.message}")
