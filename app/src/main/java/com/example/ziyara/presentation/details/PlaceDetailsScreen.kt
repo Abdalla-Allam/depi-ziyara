@@ -25,7 +25,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import coil.compose.AsyncImage
+import com.example.ziyara.navigation.Screen
 import com.example.ziyara.presentation.home.HomeViewModel
 
 @Composable
@@ -87,20 +89,6 @@ fun PlaceDetailsScreen(
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-
-                    IconButton(
-                        onClick = { /* Share action */ },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 48.dp, end = 24.dp)
-                            .background(Color.Black.copy(alpha = 0.4f), CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = "Share",
                             tint = Color.White
                         )
                     }
@@ -202,29 +190,6 @@ fun PlaceDetailsScreen(
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
-
-                        Button(
-                            onClick = { /* Open GPS */ },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(54.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F6266)),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(text = "▲ ", color = Color.White, fontSize = 14.sp)
-                                Text(
-                                    text = "Get Directions via GPS",
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 16.sp,
-                                    color = Color.White
-                                )
-                            }
-                        }
-
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Text(

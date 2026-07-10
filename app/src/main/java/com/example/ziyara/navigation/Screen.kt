@@ -1,3 +1,4 @@
+
 package com.example.ziyara.navigation
 
 import androidx.compose.foundation.background
@@ -19,8 +20,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.example.ziyara.presentation.details.PlaceDetailsScreen
 import com.example.ziyara.presentation.PlaceUiState
+import com.example.ziyara.presentation.details.PlaceDetailsScreen
 import com.example.ziyara.presentation.home.HomeScreen
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.favorites.FavoritesScreen
@@ -101,19 +102,22 @@ fun AppNavigation(
 
                             PlaceDetailsScreen(
                                 placeId = placeId,
-                                viewModel = homeViewModel,
-                                onBackClick = { navController.popBackStack() }
-                            )
+                                viewModel = homeViewModel, // مررنا الـ ViewModel هنا
+                                onBackClick = {
+                                    navController.popBackStack()
+                                },
+
+                                )
                         }
+
                     }
 
-
+                    // Bottom Navigation bar logic
                     if (currentRoute != Screen.WelcomeScreen.route && currentRoute?.startsWith("details") == false) {
                         NavigationBar(
                             containerColor = Color.White,
                             contentColor = darkGreen,
-                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
-                                .shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                         ) {
                             val items = listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
                             val icons = listOf(
