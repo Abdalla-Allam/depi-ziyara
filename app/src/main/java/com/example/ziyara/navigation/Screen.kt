@@ -32,6 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.example.ziyara.presentation.details.PlaceDetailsScreen
 import com.example.ziyara.presentation.home.HomeScreen
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.favorites.FavoritesScreen
@@ -118,6 +119,20 @@ fun AppNavigation(
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Details Screen for Place ID: $placeId")
                     }
+                }
+                composable(
+                    route = Screen.Details.route,
+                    arguments = listOf(navArgument("placeId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
+
+                    PlaceDetailsScreen(
+                        placeId = placeId,
+                        viewModel = homeViewModel, // مررنا الـ ViewModel هنا
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
 
