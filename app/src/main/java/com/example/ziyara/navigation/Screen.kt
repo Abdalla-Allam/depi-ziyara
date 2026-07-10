@@ -19,6 +19,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.example.ziyara.presentation.details.PlaceDetailsScreen
 import com.example.ziyara.presentation.PlaceUiState
 import com.example.ziyara.presentation.home.HomeScreen
 import com.example.ziyara.presentation.home.HomeViewModel
@@ -90,6 +91,21 @@ fun AppNavigation(
                         }
                     }
 
+
+                composable(
+                    route = Screen.Details.route,
+                    arguments = listOf(navArgument("placeId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
+
+                    PlaceDetailsScreen(
+                        placeId = placeId,
+                        viewModel = homeViewModel, // مررنا الـ ViewModel هنا
+                        onBackClick = {
+                            navController.popBackStack()
+                        },
+
+                    )
                     // Bottom Navigation bar logic
                     if (currentRoute != Screen.WelcomeScreen.route && currentRoute?.startsWith("details") == false) {
                         NavigationBar(

@@ -16,10 +16,21 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 
 @Composable
-fun MapsScreen(viewModel: HomeViewModel) {
+fun MapsScreen(
+    viewModel: HomeViewModel,
+    initialLat: Double? = null,
+    initialLng: Double? = null
+) {
+    val places by viewModel.places.collectAsState()
 
     val cairo = LatLng(30.0444, 31.2357)
+    var place= LatLng(30.0444, 31.2357)
     val cameraPositionState = rememberCameraPositionState {
+        if(initialLng!=null && initialLat!=null){
+            place = LatLng(initialLat,initialLng)
+            position = CameraPosition.fromLatLngZoom(place, 14f)
+        }
+        else
         position = CameraPosition.fromLatLngZoom(cairo, 11f)
     }
     val places by viewModel.places.collectAsState()
