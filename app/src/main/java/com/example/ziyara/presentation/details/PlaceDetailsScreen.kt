@@ -93,8 +93,6 @@ fun PlaceDetailsScreen(
                         )
                     }
 
-
-
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
