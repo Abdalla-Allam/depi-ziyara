@@ -25,6 +25,7 @@ import com.example.ziyara.presentation.details.PlaceDetailsScreen
 import com.example.ziyara.presentation.home.HomeScreen
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.favorites.FavoritesScreen
+import com.example.ziyara.presentation.maps.MapsScreen
 
 // Define our app screens
 sealed class Screen(val route: String) {
@@ -83,12 +84,9 @@ fun AppNavigation(
                             FavoritesScreen(favoritePlaces, { navController.navigate(Screen.Details.createRoute(it)) }, { navController.popBackStack() })
                         }
                         composable(route = Screen.MapScreen.route) {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Map Screen") }
+                            MapsScreen(homeViewModel)
                         }
-                        composable(route = Screen.Details.route, arguments = listOf(navArgument("placeId") { type = NavType.IntType })) { backStackEntry ->
-                            val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Details: $placeId") }
-                        }
+
                         composable(
                             route = Screen.Details.route,
                             arguments = listOf(navArgument("placeId") { type = NavType.IntType })
