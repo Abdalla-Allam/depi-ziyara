@@ -11,6 +11,7 @@ import com.example.ziyara.data.repository.PlaceRepository
 import com.example.ziyara.navigation.AppNavigation
 import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.home.HomeViewModelFactory
+import com.example.ziyara.presentation.maps.MapsScreen
 import com.example.ziyara.ui.theme.ZiyaraTheme
 
 class MainActivity : ComponentActivity() {

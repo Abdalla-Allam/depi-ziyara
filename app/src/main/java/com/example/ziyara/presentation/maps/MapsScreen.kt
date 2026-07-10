@@ -33,7 +33,7 @@ fun MapsScreen(
         else
         position = CameraPosition.fromLatLngZoom(cairo, 11f)
     }
-
+    val places by viewModel.places.collectAsState()
 
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
