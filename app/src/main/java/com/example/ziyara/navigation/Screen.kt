@@ -82,13 +82,8 @@ fun AppNavigation(
                         composable(route = Screen.Favorites.route) {
                             FavoritesScreen(favoritePlaces, { navController.navigate(Screen.Details.createRoute(it)) }, { navController.popBackStack() })
                         }
-                        composable(route = Screen.MapScreen.route) {
-                            MapsScreen(homeViewModel)
-                        }
-                        composable(route = Screen.Details.route, arguments = listOf(navArgument("placeId") { type = NavType.IntType })) { backStackEntry ->
-                            val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Details: $placeId") }
-                        }
+
+
                         composable(
                             route = Screen.Details.route,
                             arguments = listOf(navArgument("placeId") { type = NavType.IntType })
@@ -101,10 +96,27 @@ fun AppNavigation(
                                 onBackClick = {
                                     navController.popBackStack()
                                 },
+                                navController=navController
 
                                 )
 
 
+                        }
+                        composable(
+                            route = "${Screen.MapScreen.route}?lat={lat}&lng={lng}",
+                            arguments = listOf(
+                                navArgument("lat") { type = NavType.StringType; nullable = true },
+                                navArgument("lng") { type = NavType.StringType; nullable = true }
+                            )
+                        ) { backStackEntry ->
+                            val lat = backStackEntry.arguments?.getString("lat")?.toDoubleOrNull()
+                            val lng = backStackEntry.arguments?.getString("lng")?.toDoubleOrNull()
+
+                            MapsScreen(
+                                viewModel = homeViewModel,
+                                initialLat = lat,
+                                initialLng = lng
+                            )
                         }
                     }
 
@@ -127,8 +139,7 @@ fun AppNavigation(
                             )
                             items.forEachIndexed { index, screen ->
                                 NavigationBarItem(
-                                    selected = currentRoute == screen.route,
-                                    onClick = {
+                                    selected = currentRoute?.startsWith(screen.route) == true,                                    onClick = {
                                         navController.navigate(screen.route) {
                                             popUpTo(
                                                 navController.graph.findStartDestination().id

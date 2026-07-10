@@ -24,7 +24,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import coil.compose.AsyncImage
+import com.example.ziyara.navigation.Screen
 import com.example.ziyara.presentation.home.HomeViewModel
 
 @Composable
@@ -33,6 +35,7 @@ fun PlaceDetailsScreen(
     viewModel: HomeViewModel,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    navController: NavController
 
 ) {
     val allPlaces by viewModel.places.collectAsState(initial = emptyList())
@@ -200,7 +203,15 @@ fun PlaceDetailsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Button(
-                            onClick = { /* Open GPS */ },
+                            onClick = {
+                                navController.navigate("${Screen.MapScreen.route}?lat={lat}&lng={lng}"){
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                            }
+                                      },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(54.dp),
