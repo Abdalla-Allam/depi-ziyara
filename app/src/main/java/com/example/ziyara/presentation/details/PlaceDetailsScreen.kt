@@ -33,7 +33,7 @@ fun PlaceDetailsScreen(
     viewModel: HomeViewModel,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    navController: NavController
+
 ) {
     val allPlaces by viewModel.places.collectAsState(initial = emptyList())
     val place = allPlaces.find { it.id == placeId }
@@ -200,7 +200,7 @@ fun PlaceDetailsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Button(
-                            onClick = { /* Open GPS */ navController.navigate("MapsScreen") },
+                            onClick = { /* Open GPS */ },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(54.dp),

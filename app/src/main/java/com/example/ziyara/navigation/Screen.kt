@@ -111,15 +111,7 @@ fun AppNavigation(
                     }
                 }
 
-                composable(
-                    route = Screen.Details.route,
-                    arguments = listOf(navArgument("placeId") { type = NavType.IntType })
-                ) { backStackEntry ->
-                    val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Details Screen for Place ID: $placeId")
-                    }
-                }
+
                 composable(
                     route = Screen.Details.route,
                     arguments = listOf(navArgument("placeId") { type = NavType.IntType })
@@ -132,7 +124,7 @@ fun AppNavigation(
                         onBackClick = {
                             navController.popBackStack()
                         },
-                        navController=navController
+
                     )
                 }
             }
