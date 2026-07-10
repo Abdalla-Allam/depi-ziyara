@@ -89,39 +89,59 @@ fun AppNavigation(
                             val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Details: $placeId") }
                         }
+                        composable(
+                            route = Screen.Details.route,
+                            arguments = listOf(navArgument("placeId") { type = NavType.IntType })
+                        ) { backStackEntry ->
+                            val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
+
+                            PlaceDetailsScreen(
+                                placeId = placeId,
+                                viewModel = homeViewModel, // مررنا الـ ViewModel هنا
+                                onBackClick = {
+                                    navController.popBackStack()
+                                },
+
+                                )
+
+
+                        }
                     }
 
 
-                composable(
-                    route = Screen.Details.route,
-                    arguments = listOf(navArgument("placeId") { type = NavType.IntType })
-                ) { backStackEntry ->
-                    val placeId = backStackEntry.arguments?.getInt("placeId") ?: -1
 
-                    PlaceDetailsScreen(
-                        placeId = placeId,
-                        viewModel = homeViewModel, // مررنا الـ ViewModel هنا
-                        onBackClick = {
-                            navController.popBackStack()
-                        },
-
-                    )
                     // Bottom Navigation bar logic
                     if (currentRoute != Screen.WelcomeScreen.route && currentRoute?.startsWith("details") == false) {
                         NavigationBar(
                             containerColor = Color.White,
                             contentColor = darkGreen,
-                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                                .shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                         ) {
-                            val items = listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
-                            val icons = listOf(Icons.Default.Home, Icons.Default.LocationOn, Icons.Default.Favorite)
+                            val items =
+                                listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
+                            val icons = listOf(
+                                Icons.Default.Home,
+                                Icons.Default.LocationOn,
+                                Icons.Default.Favorite
+                            )
                             items.forEachIndexed { index, screen ->
                                 NavigationBarItem(
                                     selected = currentRoute == screen.route,
-                                    onClick = { navController.navigate(screen.route) { popUpTo(navController.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true } },
+                                    onClick = {
+                                        navController.navigate(screen.route) {
+                                            popUpTo(
+                                                navController.graph.findStartDestination().id
+                                            ) { saveState = true }; launchSingleTop =
+                                            true; restoreState = true
+                                        }
+                                    },
                                     icon = { Icon(icons[index], contentDescription = null) },
                                     label = { Text(screen.route.replaceFirstChar { it.uppercase() }) },
-                                    colors = NavigationBarItemDefaults.colors(selectedIconColor = darkGreen, unselectedIconColor = Color.Gray)
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = darkGreen,
+                                        unselectedIconColor = Color.Gray
+                                    )
                                 )
                             }
                         }
