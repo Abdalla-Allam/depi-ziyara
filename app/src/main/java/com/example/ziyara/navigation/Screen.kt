@@ -12,12 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.example.ziyara.data.OnboardingPreferences
 import com.example.ziyara.presentation.PlaceUiState
 import com.example.ziyara.presentation.details.PlaceDetailsScreen
 import com.example.ziyara.presentation.home.HomeScreen
@@ -25,8 +27,11 @@ import com.example.ziyara.presentation.home.HomeViewModel
 import com.example.ziyara.presentation.favorites.FavoritesScreen
 import com.example.ziyara.presentation.maps.MapsScreen
 import com.example.ziyara.presentation.settings.SettingsScreen
+import com.example.ziyara.presentation.Onboarding.OnboardingScreen
+import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
+    object Onboarding : Screen("onboarding")
     object WelcomeScreen : Screen("welcome")
     object HomeScreen : Screen("home")
     object MapScreen : Screen("map")
@@ -47,27 +52,55 @@ fun AppNavigation(
 ) {
 
     val uiState by homeViewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val darkGreen = Color(0xFF0F4C43)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    when (val state = uiState) {
-        is PlaceUiState.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+    val onboardingCompleted by OnboardingPreferences.isOnboardingCompleted(context)
+        .collectAsState(initial = null)
+
+    if (onboardingCompleted == null || uiState is PlaceUiState.Loading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
+        return
+    }
+
+    when (val state = uiState) {
         is PlaceUiState.Success -> {
             val allPlaces = state.places
             val favoritePlaces = allPlaces.filter { it.isFavorite }
+
+            val startDestination = if (onboardingCompleted == true) {
+                Screen.HomeScreen.route
+            } else {
+                Screen.Onboarding.route
+            }
 
             Scaffold { innerPadding ->
                 Box(modifier = Modifier.fillMaxSize()) {
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.HomeScreen.route,
-                        modifier = Modifier.fillMaxSize().padding(bottom = innerPadding.calculateBottomPadding())
+                        startDestination = startDestination,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = innerPadding.calculateBottomPadding())
                     ) {
+                        composable(route = Screen.Onboarding.route) {
+                            OnboardingScreen(
+                                onFinished = {
+                                    scope.launch {
+                                        OnboardingPreferences.setOnboardingCompleted(context)
+                                        navController.navigate(Screen.HomeScreen.route) {
+                                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                                        }
+                                    }
+                                }
+                            )
+                        }
+
                         composable(route = Screen.HomeScreen.route) {
                             HomeScreen(
                                 viewModel = homeViewModel,
@@ -82,9 +115,15 @@ fun AppNavigation(
 
                         composable(route = Screen.Favorites.route) {
                             FavoritesScreen(
-                                currentLanguage = currentLanguage, // تم التعديل هنا
+                                currentLanguage = currentLanguage,
                                 favoritePlaces = favoritePlaces,
-                                onPlaceClick = { navController.navigate(Screen.Details.createRoute(it)) },
+                                onPlaceClick = {
+                                    navController.navigate(
+                                        Screen.Details.createRoute(
+                                            it
+                                        )
+                                    )
+                                },
                                 onBackClick = { navController.popBackStack() },
                                 onClearAllClick = { homeViewModel.clearAllFavorites() }
                             )
@@ -116,22 +155,34 @@ fun AppNavigation(
                     }
 
                     if (currentRoute != Screen.WelcomeScreen.route &&
+                        currentRoute != Screen.Onboarding.route &&
                         currentRoute?.startsWith("details") == false &&
-                        currentRoute != Screen.Settings.route) {
+                        currentRoute != Screen.Settings.route
+                    ) {
                         NavigationBar(
                             containerColor = Color.White,
                             contentColor = darkGreen,
-                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter)
+                                .shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                         ) {
-                            val items = listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
-                            val icons = listOf(Icons.Default.Home, Icons.Default.LocationOn, Icons.Default.Favorite)
+                            val items =
+                                listOf(Screen.HomeScreen, Screen.MapScreen, Screen.Favorites)
+                            val icons = listOf(
+                                Icons.Default.Home,
+                                Icons.Default.LocationOn,
+                                Icons.Default.Favorite
+                            )
 
                             items.forEachIndexed { index, screen ->
                                 NavigationBarItem(
                                     selected = currentRoute == screen.route,
                                     onClick = {
                                         navController.navigate(screen.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
@@ -152,10 +203,13 @@ fun AppNavigation(
                 }
             }
         }
+
         is PlaceUiState.Error -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Error: ${state.message}")
             }
         }
+
+        else -> Unit
     }
 }

@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,7 +46,7 @@ import com.example.ziyara.ui.theme.ZiyaraCream
 import com.example.ziyara.ui.theme.ZiyaraDarkGreen
 import com.example.ziyara.ui.theme.ZiyaraLightSand
 import kotlinx.coroutines.launch
-
+import androidx.compose.foundation.layout.statusBarsPadding
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -65,7 +64,10 @@ fun OnboardingScreen(onFinished: () -> Unit) {
         if (!isLastPage) {
             TextButton(
                 onClick = onFinished,
-                modifier = Modifier.align(Alignment.TopEnd).padding(top = 24.dp, end = 20.dp)
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, end = 20.dp)
             ) {
                 Text("Skip", color = ZiyaraDarkGreen)
             }
@@ -78,18 +80,24 @@ fun OnboardingScreen(onFinished: () -> Unit) {
             Spacer(modifier = Modifier.height(48.dp))
 
             HorizontalPager(
-                state = pagerState, modifier = Modifier.weight(1f).fillMaxWidth()
+                state = pagerState, modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
             ) { pageIndex ->
                 val page = onboardingPages[pageIndex]
                 Column(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top
                 ) {
                     Image(
                         painter = painterResource(id = page.image),
                         contentDescription = page.title,
-                        modifier = Modifier.fillMaxWidth().height(320.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(320.dp),
                         contentScale = ContentScale.Fit
                     )
                     Spacer(modifier = Modifier.height(24.dp))
@@ -129,14 +137,18 @@ fun OnboardingScreen(onFinished: () -> Unit) {
 
 
             Box(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
                     .padding(bottom = 32.dp)
             ) {
                 if (isLastPage) {
 
                     Button(
                         onClick = onFinished,
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = ZiyaraDarkGreen),
                         shape = RoundedCornerShape(16.dp)
                     ) {
